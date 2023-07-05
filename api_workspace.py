@@ -13,8 +13,6 @@ org_=str(org_v)
 ace_=str(ace_v)
 name_=str(name_v)
 
-
-
 def find_api_key(ti):
         expanded_conf_file_path = os.path.expanduser("~/.ngc/config")
         if os.path.exists(expanded_conf_file_path):
@@ -42,6 +40,7 @@ def get_token(ti, org ):
         api = ti.xcom_pull(task_ids='api_connect')
         print(f"Xcom pull gives me {api}")
         print(f"idk if this will work but here's ti {ti}")
+        
         '''Use the api key set environment variable to generate auth token'''
         scope = f'group/ngc:{org}'
         # if team: #shortens the token if included
@@ -49,6 +48,7 @@ def get_token(ti, org ):
         querystring = {"service": "ngc", "scope": scope}
         auth = '$oauthtoken:{0}'.format(api)
         auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
+        
         headers = {
             'Authorization': f'Basic {auth}',
             'Content-Type': 'application/json',
@@ -63,6 +63,7 @@ def get_token(ti, org ):
 def create_workspace(ti, org, ace, name):
         token = ti.xcom_pull(task_ids='token')
         print(f"Xcom pull gives me {token}")
+        
         '''Create a workspace in a given org for the authenticated user'''
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
         headers = {
