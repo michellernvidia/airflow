@@ -13,29 +13,35 @@ org_=str(org_v)
 ace_=str(ace_v)
 name_=str(name_v)
 
-def find_api_key(ti):
-        expanded_conf_file_path = "/Users/micheller/.ngc/config" #os.path.expanduser("~/.ngc/config")
-        print(expanded_conf_file_path)
-        if os.path.exists(expanded_conf_file_path):
-            print("Config file exists, pulling API key from it")
-            try:
-                config_file = open(expanded_conf_file_path, "r")
-                lines = config_file.readlines()
-                for line in lines:
-                 if "apikey" in line:
-                    elements = line.split()
-                    return elements[-1]
+# def find_api_key(ti):
+#         expanded_conf_file_path = "/Users/micheller/.ngc/config" #os.path.expanduser("~/.ngc/config")
+#         print(expanded_conf_file_path)
+#         if os.path.exists(expanded_conf_file_path):
+#             print("Config file exists, pulling API key from it")
+#             try:
+#                 config_file = open(expanded_conf_file_path, "r")
+#                 lines = config_file.readlines()
+#                 for line in lines:
+#                  if "apikey" in line:
+#                     elements = line.split()
+#                     return elements[-1]
                    
-            except:
-                print("Failed to find the API key in config file")
-                return ''
-        elif os.environ.get('API_KEY'):
-            print("Using API_KEY environment variable")
-            return os.environ.get('API_KEY')
+#             except:
+#                 print("Failed to find the API key in config file")
+#                 return ''
+#         elif os.environ.get('API_KEY'):
+#             print("Using API_KEY environment variable")
+#             return os.environ.get('API_KEY')
             
-        else:
-            print("Could not find a valid API key")
-            return ''
+#         else:
+#             print("Could not find a valid API key")
+#             return ''
+
+
+def find_api_key(ti):
+        '''Hard coded api key retrieval function'''
+        api_key = 'bGxzOGN0NThja25jbGhhMWduaW5ya3ZuMTM6YjcxMWE5ZWItMjdmNC00MTA5LWI5NmItMTkzNDJiMzg0ZjFk'
+        return api_key
        
 def get_token(ti, org ):
         api = ti.xcom_pull(task_ids='api_connect')
