@@ -11,9 +11,9 @@ team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
 name_v= Variable.get("name_v", deserialize_json=True)
 
-key_ = str(key_v)
+key_= str(key_v)
 org_=str(org_v)
-team_ = str(team_v)
+team_= str(team_v)
 ace_=str(ace_v)
 name_=str(name_v)
 
@@ -52,7 +52,7 @@ def create_workspace(ti, org, team, ace, name):
         print(f"Xcom pull gives me {token}")
         
         '''Create a workspace in a given org for the authenticated user'''
-        url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/workspaces/'
+        url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
