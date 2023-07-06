@@ -5,15 +5,17 @@ from airflow.decorators import task
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 
+api_key_v = Variable.get("api_key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
+team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
 name_v= Variable.get("name_v", deserialize_json=True)
-api_key_v = Variable.get("key_v", deserialize_json=True)
 
+api_key_ = str(api_key_v)
 org_=str(org_v)
+team = str(team_v)
 ace_=str(ace_v)
 name_=str(name_v)
-api_key_ = str(api_key_v)
 
 
 def find_api_key(ti):
@@ -45,12 +47,12 @@ def get_token(ti, org ):
              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
         return json.loads(response.text.encode('utf8'))["token"]
 
-def create_workspace(ti, org, ace, name):
+def create_workspace(ti, org, team, ace, name):
         token = ti.xcom_pull(task_ids='token')
         print(f"Xcom pull gives me {token}")
         
         '''Create a workspace in a given org for the authenticated user'''
-        url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
+        url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/workspaces/'
         headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
@@ -84,7 +86,7 @@ with DAG(
     t3 = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
-            op_kwargs= {"org":org_, "ace": ace_ , "name": name_},
+            op_kwargs= {"org":org_, "team": team_, "ace": ace_ , "name": name_},
             dag = dag
     )
 
