@@ -13,7 +13,7 @@ name_v= Variable.get("name_v", deserialize_json=True)
 
 api_key_ = str(api_key_v)
 org_=str(org_v)
-team = str(team_v)
+team_ = str(team_v)
 ace_=str(ace_v)
 name_=str(name_v)
 
