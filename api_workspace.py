@@ -14,7 +14,7 @@ ace_=str(ace_v)
 name_=str(name_v)
 
 def find_api_key(ti):
-        expanded_conf_file_path = os.path.expanduser("~/.ngc/config")
+        expanded_conf_file_path = "/Users/micheller/.ngc/config" #os.path.expanduser("~/.ngc/config")
         print(expanded_conf_file_path)
         if os.path.exists(expanded_conf_file_path):
             print("Config file exists, pulling API key from it")
