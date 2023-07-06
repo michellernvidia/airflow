@@ -51,9 +51,11 @@ def create_workspace(ti, org, ace):
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
          }
+        
+        # nemo_ckpt_.split('.')[0] + 
         data = {
           'aceName': f'{ace}',
-          'name': nemo_ckpt_.split('.')[0] + '_workspace'
+          'name': 'nemo_5b_airflow_workspace'
          }
         response = requests.request("POST", url, headers=headers, data=json.dumps(data))
         if response.status_code != 200:
