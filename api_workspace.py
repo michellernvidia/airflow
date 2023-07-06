@@ -64,6 +64,8 @@ def create_workspace(ti, org, team, ace, name):
         response = requests.request("POST", url, headers=headers, data=json.dumps(data))
         if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+        
+        print(response.json())
         return response.json()
         
 with DAG(
