@@ -8,13 +8,16 @@ from airflow.models import Variable
 org_v = Variable.get("org_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
 name_v= Variable.get("name_v", deserialize_json=True)
+api_key_v= Variable.get("api_key_v", deserialize_json=True)
 
 org_=str(org_v)
 ace_=str(ace_v)
 name_=str(name_v)
+api_key_=str(api_key_v)
 
 def find_api_key(ti):
         expanded_conf_file_path = os.path.expanduser("~/.ngc/config")
+        print(expanded_conf_file_path)
         if os.path.exists(expanded_conf_file_path):
             print("Config file exists, pulling API key from it")
             try:
