@@ -57,6 +57,7 @@ def get_token(ti, org ):
         url = 'https://authn.nvidia.com/token'
         response = requests.request("GET", url, headers=headers, params=querystring)
         if response.status_code != 200:
+             print(response)
              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
         return json.loads(response.text.encode('utf8'))["token"]
 
