@@ -5,13 +5,13 @@ from airflow.decorators import task
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 
-api_key_v = Variable.get("api_key_v", deserialize_json=True)
+key_v = Variable.get("key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
 team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
 name_v= Variable.get("name_v", deserialize_json=True)
 
-api_key_ = str(api_key_v)
+key_ = str(key_v)
 org_=str(org_v)
 team_ = str(team_v)
 ace_=str(ace_v)
@@ -20,7 +20,7 @@ name_=str(name_v)
 
 def find_api_key(ti):
         '''Hard coded api key retrieval function'''
-        return api_key_
+        return key_
        
 def get_token(ti, org ):
         api = ti.xcom_pull(task_ids='api_connect')
