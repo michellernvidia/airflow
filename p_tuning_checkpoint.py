@@ -63,6 +63,7 @@ def create_workspace(ti, org, ace, workspace_name):
         if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
         
+        print(response.json())
         return response.json()
 
 def download_nemo_checkpoint(ti, org, team, ace):
