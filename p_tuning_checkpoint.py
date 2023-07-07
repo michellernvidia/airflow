@@ -70,7 +70,7 @@ def download_nemo_checkpoint(ti, org, team, ace):
       token = ti.xcom_pull(task_ids='token')
       workspace_response = ti.xcom_pull(task_ids='api_connect')
 
-      print(workspace_response)
+      print('WORKSPACE RESPONSE', workspace_response)
       workspace_id = workspace_response['workspace']['id']
 
       url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
