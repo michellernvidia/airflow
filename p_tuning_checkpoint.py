@@ -10,12 +10,14 @@ key_v = Variable.get("key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
 team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
+workspace_name_v = Variable.get("workspace_name_v", deserialize_json=True)
 nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
 
 key_= str(key_v)
 org_=str(org_v)
 team_= str(team_v)
 ace_=str(ace_v)
+workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 
 ## 1. Connect to BCP API
@@ -41,7 +43,7 @@ def get_token(ti, org):
         return json.loads(response.text.encode('utf8'))["token"]
 
 ## 2. Download a NeMo checkpoint into a Workspace 
-def create_workspace(ti, org, ace):
+def create_workspace(ti, org, ace, workspace_name):
         token = ti.xcom_pull(task_ids='token')
         print(f"Xcom pull gives me {token}")
         
@@ -55,7 +57,7 @@ def create_workspace(ti, org, ace):
         # nemo_ckpt_.split('.')[0] + 
         data = {
           'aceName': f'{ace}',
-          'name': 'nemo_5b_airflow_workspace'
+          'name': workspace_name
          }
         response = requests.request("POST", url, headers=headers, data=json.dumps(data))
         if response.status_code != 200:
@@ -130,7 +132,7 @@ with DAG(
     t2 = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
-            op_kwargs= {"org":org_, "team": team_, "ace": ace_},
+            op_kwargs= {"org":org_, "team": team_, "ace": ace_, "workspace_name": workspace_name_},
             dag = dag
     )
 
