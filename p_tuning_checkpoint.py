@@ -42,7 +42,7 @@ def get_token(ti, org):
              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
         return json.loads(response.text.encode('utf8'))["token"]
 
-## 2. Download a NeMo checkpoint into a Workspace 
+# 2. Download a NeMo checkpoint into a Workspace 
 def create_workspace(ti, org, ace, workspace_name):
         token = ti.xcom_pull(task_ids='token')
         print(f"Xcom pull gives me {token}")
@@ -66,26 +66,82 @@ def create_workspace(ti, org, ace, workspace_name):
         # print(response.json())
         return response.json()
 
-def download_nemo_checkpoint(ti, org, team, ace):
+# def download_nemo_checkpoint(ti, org, team, ace):
+#       '''Downloads pretrained GPT .nemo checkpoint into our created bcp workspace'''
+#       token = ti.xcom_pull(task_ids='token')
+#       workspace_response = ti.xcom_pull(task_ids='workspace')
+
+#       print('WORKSPACE RESPONSE', workspace_response)
+#       workspace_id = workspace_response['workspace']['id']
+#       print('WORKSPACE ID', workspace_id)
+
+#     #   url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
+#       url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
+
+#       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+
+#       ## currently configured for 5b 
+#       data = {
+#                 "name": "airflow_download_gpt3_5b_ckpt",
+#                 "aceInstance": "dgxa100.80g.1.norm",
+#                 "aceName": ace,
+#                 "dockerImageName": f"{org}/nemofw-training:23.04.1-py3",
+#                 "jobOrder": 50,
+#                 "jobPriority": "NORMAL",
+#                 "replicaCount": 1,
+#                 "reservedLabels": [],
+#                 "resultContainerMountPoint": "/results",
+#                 "runPolicy": {
+#                     "preemptClass": "RUNONCE"
+#                 },
+#                 "systemLabels": [],
+#                 "userLabels": [],
+#                 "userSecretsSpec": [],
+#                 "workspaceMounts": [
+#                     {
+#                         "containerMountPoint": "/mount/data",
+#                         "id": workspace_id,
+#                         "mountMode": "RW"
+#                     }
+#                 ],
+#                 "command": "cd ../; cd /mount/data/; \
+#                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
+#             }
+      
+#       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+      
+#       if response.status_code != 200:
+#             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+#       return response.json()
+    
+
+def ngc_job_request(ti, org, data):
       '''Downloads pretrained GPT .nemo checkpoint into our created bcp workspace'''
       token = ti.xcom_pull(task_ids='token')
-      workspace_response = ti.xcom_pull(task_ids='workspace')
-
-      print('WORKSPACE RESPONSE', workspace_response)
-      workspace_id = workspace_response['workspace']['id']
-      print('WORKSPACE ID', workspace_id)
-
-    #   url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
+      
       url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+      
+      response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+      
+      if response.status_code != 200:
+            raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+      return response.json()
 
-      ## currently configured for 5b 
+
+def download_nemo_checkpoint(ti, org, ace):
+      
+      #get workspace id
+      workspace_response = ti.xcom_pull(task_ids='workspace')
+      workspace_id = workspace_response['workspace']['id']
+
+      #define job specifics
       data = {
                 "name": "airflow_download_gpt3_5b_ckpt",
                 "aceInstance": "dgxa100.80g.1.norm",
                 "aceName": ace,
-                "dockerImageName": "tzcwjedpb1di/nemofw-training:23.04.1-py3",
+                "dockerImageName": f"{org}/nemofw-training:23.04.1-py3",
                 "jobOrder": 50,
                 "jobPriority": "NORMAL",
                 "replicaCount": 1,
@@ -108,15 +164,109 @@ def download_nemo_checkpoint(ti, org, team, ace):
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
             }
       
-      response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+      job_response_json = ngc_job_request(ti, org, data)
+      return job_response_json
+
+def p_tuning_training_bcp(ti, org, ace):
       
-      if response.status_code != 200:
-            raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
-      return response.json()
-    
+      #get workspace id
+      workspace_response = ti.xcom_pull(task_ids='workspace')
+      workspace_id = workspace_response['workspace']['id']
 
-## 3. Launch P-tuning on BCP to tune the saved NeMo Checkpoint
+      #actual command to run p-tuning with NeMo framework  
+      p_tuning_command = "cd ../; python3 opt/NeMo/examples/nlp/language_modeling/megatron_gpt_prompt_learning.py \
+                                            --config-path=/mount/config/ \
+                                            --config-name=p_tuning_tutorial_config_modified.yaml \
+                                            name=p-tuning-gpt3-5b-airflow \
+                                            trainer.precision=bf16 \
+                                            trainer.devices=4 \
+                                            model.language_model_path=/mount/results/gpt_nemo_models/nemo_gpt5B_bf16_tp2.nemo \
+                                            model.nemo_path=/mount/results/gpt_nemo_models/p_tuned_models/p_tuning_5b.nemo \
+                                            model.tensor_model_parallel_size=2"
+      #job data
+      data = {
+                "name": "p_tuning_train_gpt5b_airflow",
+                "aceInstance": "dgxa100.80g.1.norm",
+                "aceName": ace,
+                "dockerImageName": f"{org}/nemofw-training:23.04.1-py3",
+                "jobOrder": 50,
+                "jobPriority": "NORMAL",
+                "replicaCount": 1,
+                "reservedLabels": [],
+                "resultContainerMountPoint": "/results",
+                "runPolicy": {
+                    "preemptClass": "RUNONCE"
+                },
+                "systemLabels": [],
+                "userLabels": [],
+                "userSecretsSpec": [],
+                "workspaceMounts": [
+                    {
+                        "containerMountPoint": "/mount/data",
+                        "id": workspace_id,
+                        "mountMode": "RW"
+                    }
+                ],
+                "command": p_tuning_command
+            } 
 
+      job_response_json = ngc_job_request(ti, org, data)
+      return job_response_json     
+
+# ## 3. Launch P-tuning on BCP to tune the saved NeMo Checkpoint
+# def p_tuning_training_bcp(ti, org, ace):
+#       token = ti.xcom_pull(task_ids='token')
+#       workspace_response = ti.xcom_pull(task_ids='workspace')
+
+#       print('WORKSPACE RESPONSE', workspace_response)
+#       workspace_id = workspace_response['workspace']['id']
+#       print('WORKSPACE ID', workspace_id)
+
+#       url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
+
+#       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+
+#       p_tuning_command = "cd ../; python3 opt/NeMo/examples/nlp/language_modeling/megatron_gpt_prompt_learning.py \
+#                                             --config-path=/mount/config/ \
+#                                             --config-name=p_tuning_tutorial_config_modified.yaml \
+#                                             name=p-tuning-gpt3-5b-airflow \
+#                                             trainer.precision=bf16 \
+#                                             trainer.devices=4 \
+#                                             model.language_model_path=/mount/results/gpt_nemo_models/nemo_gpt5B_bf16_tp2.nemo \
+#                                             model.nemo_path=/mount/results/gpt_nemo_models/p_tuned_models/p_tuning_5b.nemo \
+#                                             model.tensor_model_parallel_size=2"
+#       data = {
+#                 "name": "p_tuning_train_gpt5b_airflow",
+#                 "aceInstance": "dgxa100.80g.1.norm",
+#                 "aceName": ace,
+#                 "dockerImageName": f"{org}/nemofw-training:23.04.1-py3",
+#                 "jobOrder": 50,
+#                 "jobPriority": "NORMAL",
+#                 "replicaCount": 1,
+#                 "reservedLabels": [],
+#                 "resultContainerMountPoint": "/results",
+#                 "runPolicy": {
+#                     "preemptClass": "RUNONCE"
+#                 },
+#                 "systemLabels": [],
+#                 "userLabels": [],
+#                 "userSecretsSpec": [],
+#                 "workspaceMounts": [
+#                     {
+#                         "containerMountPoint": "/mount/data",
+#                         "id": workspace_id,
+#                         "mountMode": "RW"
+#                     }
+#                 ],
+#                 "command": p_tuning_command
+#             }
+      
+#       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+      
+#       if response.status_code != 200:
+#             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+#       return response.json()
+      
 
 ## Define DAG + Tasks
 with DAG(
