@@ -75,7 +75,8 @@ def download_nemo_checkpoint(ti, org, team, ace):
       workspace_id = workspace_response['workspace']['id']
       print('WORKSPACE ID', workspace_id)
 
-      url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
+    #   url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
+      url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
 
