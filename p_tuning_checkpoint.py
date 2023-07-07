@@ -63,13 +63,13 @@ def create_workspace(ti, org, ace, workspace_name):
         if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
         
-        print(response.json())
+        # print(response.json())
         return response.json()
 
 def download_nemo_checkpoint(ti, org, team, ace):
       '''Downloads pretrained GPT .nemo checkpoint into our created bcp workspace'''
       token = ti.xcom_pull(task_ids='token')
-      workspace_response = ti.xcom_pull(task_ids='api_connect')
+      workspace_response = ti.xcom_pull(task_ids='workspace')
 
       print('WORKSPACE RESPONSE', workspace_response)
       workspace_id = workspace_response['workspace']['id']
@@ -129,7 +129,8 @@ with DAG(
             python_callable=get_token,
             op_kwargs={"org": org_},
             dag = dag
-    )  
+    ) 
+
     t2 = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
