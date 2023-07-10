@@ -133,7 +133,7 @@ def download_nemo_checkpoint(ti, org, ace):
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
             }
       
-      job_response_json = ngc_job_request(ti, org, data)['jobRequestJson']
+      job_response_json = ngc_job_request(ti, org, data)#['jobRequestJson']
       job_id = job_response_json['job']['id']
       status = ngc_job_status(org, job_id)
       return status
