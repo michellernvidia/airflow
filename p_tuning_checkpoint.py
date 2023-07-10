@@ -87,7 +87,7 @@ def ngc_job_status(ti, org, id):
     
     token = ti.xcom_pull(task_ids='token')
     
-    url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{id}'
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/rusteze/jobs/{id}'
     
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
       
