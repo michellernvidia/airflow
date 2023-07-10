@@ -21,51 +21,51 @@ workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 
 ## 1. Connect to BCP API
-def get_token(ti, org, team=None):        
-        '''Use the api key set environment variable to generate auth token'''
-        scope = f'group/ngc:{org}'
-        # if team: #shortens the token if included
-        #   scope += f'/{team}'
-        querystring = {"service": "ngc", "scope": scope}
-        auth = '$oauthtoken:{0}'.format(key_)
-        auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
+# def get_token(ti, org, team=None):        
+#         '''Use the api key set environment variable to generate auth token'''
+#         scope = f'group/ngc:{org}'
+#         # if team: #shortens the token if included
+#         #   scope += f'/{team}'
+#         querystring = {"service": "ngc", "scope": scope}
+#         auth = '$oauthtoken:{0}'.format(key_)
+#         auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
         
-        headers = {
-            'Authorization': f'Basic {auth}',
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
-         }
-        url = 'https://authn.nvidia.com/token'
-        response = requests.request("GET", url, headers=headers, params=querystring)
-        if response.status_code != 200:
-             print(response)
-             raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
-        return json.loads(response.text.encode('utf8'))["token"]
+#         headers = {
+#             'Authorization': f'Basic {auth}',
+#             'Content-Type': 'application/json',
+#             'Cache-Control': 'no-cache',
+#          }
+#         url = 'https://authn.nvidia.com/token'
+#         response = requests.request("GET", url, headers=headers, params=querystring)
+#         if response.status_code != 200:
+#              print(response)
+#              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
+#         return json.loads(response.text.encode('utf8'))["token"]
 
 
-# def get_token(org=None, team=None):
-#     '''Use the api key set environment variable to generate auth token'''
-#     scope_list = []
-#     scope = f'group/ngc:{org}'
-#     scope_list.append(scope)
-#     if team:
-#         team_scope = f'group/ngc:{org}/{team}'
-#         scope_list.append(team_scope)
+def get_token(ti, org=None, team=None):
+    '''Use the api key set environment variable to generate auth token'''
+    scope_list = []
+    scope = f'group/ngc:{org}'
+    scope_list.append(scope)
+    if team:
+        team_scope = f'group/ngc:{org}/{team}'
+        scope_list.append(team_scope)
 
-#     querystring = {"service": "ngc", "scope": scope_list}
+    querystring = {"service": "ngc", "scope": scope_list}
 
-#     auth = '$oauthtoken:{0}'.format(find_api_key())
-#     auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
-#     headers = {
-#         'Authorization': f'Basic {auth}',
-#         'Content-Type': 'application/json',
-#         'Cache-Control': 'no-cache',
-#     }
-#     url = 'https://authn.nvidia.com/token'
-#     response = requests.request("GET", url, headers=headers, params=querystring)
-#     if response.status_code != 200:
-#         raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
-#     return json.loads(response.text.encode('utf8'))["token"]
+    auth = '$oauthtoken:{0}'.format(key_)
+    auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
+    headers = {
+        'Authorization': f'Basic {auth}',
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+    }
+    url = 'https://authn.nvidia.com/token'
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
+    return json.loads(response.text.encode('utf8'))["token"]
 
 
 # 2. Download a NeMo checkpoint into a Workspace 
@@ -92,17 +92,16 @@ def create_workspace(ti, org, ace, workspace_name):
         
         return response.json()
 
-def ngc_job_request(ti, org, data):
+def ngc_job_request(ti, org, data, team=None):
       '''Creates an NGC job request via API'''
       token = ti.xcom_pull(task_ids='token')
-      
-      url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
+      if team:
+        url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
+      else:
+        url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
-      
       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
-      
-      print('JOB RESPONSE', response.json())
       if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
       return response.json()
@@ -112,22 +111,16 @@ def ngc_job_status(ti, org, job_id):
     '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
     
     token = ti.xcom_pull(task_ids='token')
-    
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{job_id}'
-    
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
-      
     response = requests.request("GET", url, headers=headers)
-      
-    print('JOB STATUS RESPONSE', response.json())
     if response.status_code != 200:
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
-    
     job_info = response.json()
     return job_info['job']['jobStatus']['status']
 
 
-def download_nemo_checkpoint(ti, org, ace):
+def download_nemo_checkpoint(ti, org, ace, team=None):
       
       #get workspace id
       workspace_response = ti.xcom_pull(task_ids='workspace')
@@ -161,20 +154,19 @@ def download_nemo_checkpoint(ti, org, ace):
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
             }
       
-      job_response = ngc_job_request(ti, org, data)
+      job_response = ngc_job_request(ti, org, data, team)
       job_id = job_response['job']['id']
 
       #keep waiting until job completes
       job_status = ngc_job_status(ti, org, job_id)
       while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED':
-            #wait 5 seconds before requesting the job status again
-            time.sleep(10)
+            time.sleep(20)
             job_status = ngc_job_status(ti, org, job_id)
             print(job_status)
 
       return job_response
 
-def p_tuning_training_bcp(ti, org, ace):
+def p_tuning_training_bcp(ti, org, ace, team=None):
       
       #get workspace id
       workspace_response = ti.xcom_pull(task_ids='workspace')
@@ -221,8 +213,17 @@ def p_tuning_training_bcp(ti, org, ace):
                 "command": p_tuning_command
             } 
 
-      job_response_json = ngc_job_request(ti, org, data)
-      return job_response_json 
+      job_response = ngc_job_request(ti, org, data, team)
+      job_id = job_response['job']['id']
+
+      #keep waiting until job completes
+      job_status = ngc_job_status(ti, org, job_id)
+      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED':
+            time.sleep(20)
+            job_status = ngc_job_status(ti, org, job_id)
+            print(job_status)
+
+      return job_response 
     
 # def p_tuning_bcp_inference(ti, org, ace):
 #       #get workspace id
@@ -297,7 +298,7 @@ with DAG(
     t3 = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
-            op_kwargs= {"org":org_, "ace": ace_},
+            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
             dag = dag
           
     )
