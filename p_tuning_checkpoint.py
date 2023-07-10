@@ -82,10 +82,21 @@ def ngc_job_request(ti, org, data):
       return response.json()
 
 
-# def ngc_job_status(ti, org, age):
-#     #   /v2/org/{org-name}/jobs/{id}
-#     # 
-#     return status
+def ngc_job_status(ti, org, id):
+    '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
+    
+    token = ti.xcom_pull(task_ids='token')
+    
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{id}'
+    
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+      
+    response = requests.request("GET", url, headers=headers)
+      
+    print('JOB STATUS RESPONSE', response.json())
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    return response.json()
 
 
 def download_nemo_checkpoint(ti, org, ace):
@@ -122,8 +133,10 @@ def download_nemo_checkpoint(ti, org, ace):
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
             }
       
-      job_response_json = ngc_job_request(ti, org, data)
-      return job_response_json
+      job_response_json = ngc_job_request(ti, org, data)['jobRequestJson']
+      job_id = job_response_json['job']['id']
+      status = ngc_job_status(org, job_id)
+      return status
 
 def p_tuning_training_bcp(ti, org, ace):
       
