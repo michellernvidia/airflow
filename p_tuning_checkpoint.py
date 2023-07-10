@@ -140,7 +140,7 @@ def download_nemo_checkpoint(ti, org, ace):
 
       #keep waiting until job completes
       job_status = ngc_job_status(ti, org, job_id)
-      while (job_status != 'FINISHED_SUCCESS') or (job_status != 'FAILED'):
+      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED':
             #wait 5 seconds before requesting the job status again
             time.sleep(10)
             job_status = ngc_job_status(ti, org, job_id)
