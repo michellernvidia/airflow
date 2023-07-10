@@ -1,4 +1,4 @@
-import os, json, base64, requests
+import os, json, base64, requests, time
 from datetime import datetime
 from airflow import DAG
 from airflow.decorators import task
@@ -96,7 +96,9 @@ def ngc_job_status(ti, org, job_id):
     print('JOB STATUS RESPONSE', response.json())
     if response.status_code != 200:
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
-    return response.json()
+    
+    job_info = response.json()
+    return job_info['job']['jobStatus']['status']
 
 
 def download_nemo_checkpoint(ti, org, ace):
@@ -133,11 +135,18 @@ def download_nemo_checkpoint(ti, org, ace):
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
             }
       
-      job_id = ngc_job_request(ti, org, data)['job']['id']
-      r = ngc_job_status(ti, org, job_id)#['job']['jobStatus']['status']
-      print('KEYS', r['job'].keys())
-      print(r['job']['jobStatus']['status'])
-      return r
+      job_response = ngc_job_request(ti, org, data)
+
+      #keep waiting until job completes
+      job_id = job_response['job']['id']
+      job_status = ngc_job_status(ti, org, job_id)
+      while job_status != 'FINISHED_SUCCESS' or job_status != 'FAILED':
+            #wait 5 seconds before requesting the job status again
+            time.sleep(5)
+            job_status = ngc_job_status(ti, org, job_id)
+            print('JOB STATUS ---------- ', job_status)
+
+      return job_response
 
 def p_tuning_training_bcp(ti, org, ace):
       
