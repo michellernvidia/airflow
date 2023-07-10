@@ -67,7 +67,7 @@ def create_workspace(ti, org, ace, workspace_name):
         return response.json()
 
 def ngc_job_request(ti, org, data):
-      '''Downloads pretrained GPT .nemo checkpoint into our created bcp workspace'''
+      '''Creates an NGC job request via API'''
       token = ti.xcom_pull(task_ids='token')
       
       url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
@@ -76,12 +76,18 @@ def ngc_job_request(ti, org, data):
       
       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
       
-      print('JOB RESPONSE', response)
+      print('JOB RESPONSE', response.json())
       if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
       return response.json()
 
-      
+
+# def ngc_job_status(ti, org, age):
+#     #   /v2/org/{org-name}/jobs/{id}
+#     # 
+#     return status
+
+
 def download_nemo_checkpoint(ti, org, ace):
       
       #get workspace id
