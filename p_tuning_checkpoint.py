@@ -284,7 +284,7 @@ with DAG(
     t1 = PythonOperator(
             task_id = 'token',
             python_callable=get_token,
-            op_kwargs={"org": org_},
+            op_kwargs={"org": org_ , "team": team_},
             dag = dag
     ) 
 
