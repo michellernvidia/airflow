@@ -21,7 +21,7 @@ workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 
 ## 1. Connect to BCP API
-def get_token(ti, org):        
+def get_token(ti, org, team=None):        
         '''Use the api key set environment variable to generate auth token'''
         scope = f'group/ngc:{org}'
         # if team: #shortens the token if included
@@ -136,15 +136,15 @@ def download_nemo_checkpoint(ti, org, ace):
             }
       
       job_response = ngc_job_request(ti, org, data)
+      job_id = job_response['job']['id']
 
       #keep waiting until job completes
-      job_id = job_response['job']['id']
       job_status = ngc_job_status(ti, org, job_id)
-      while job_status != 'FINISHED_SUCCESS' or job_status != 'FAILED':
+      while (job_status != 'FINISHED_SUCCESS') or (job_status != 'FAILED'):
             #wait 5 seconds before requesting the job status again
-            time.sleep(5)
+            time.sleep(10)
             job_status = ngc_job_status(ti, org, job_id)
-            print('JOB STATUS ---------- ', job_status)
+            print(job_status)
 
       return job_response
 
