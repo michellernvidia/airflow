@@ -76,6 +76,7 @@ def ngc_job_request(ti, org, data):
       
       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
       
+      print('JOB RESPONSE', response)
       if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
       return response.json()
