@@ -135,7 +135,8 @@ def download_nemo_checkpoint(ti, org, ace):
       
       job_id = ngc_job_request(ti, org, data)['job']['id']
       r = ngc_job_status(ti, org, job_id)#['job']['jobStatus']['status']
-      print('KEYS', r.keys())
+      print('KEYS', r['job'].keys())
+      print(r['job']['jobStatus']['status'])
       return r
 
 def p_tuning_training_bcp(ti, org, ace):
@@ -274,4 +275,4 @@ with DAG(
           
     )
 
-t1 >> t2 >> t3 >> t4
+t1 >> t2 >> t3 #>> t4
