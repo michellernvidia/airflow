@@ -82,12 +82,12 @@ def ngc_job_request(ti, org, data):
       return response.json()
 
 
-def ngc_job_status(ti, org, id):
+def ngc_job_status(ti, org, job_id):
     '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
     
     token = ti.xcom_pull(task_ids='token')
     
-    url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{id}'
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{job_id}'
     
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
       
@@ -267,12 +267,12 @@ with DAG(
           
     )
 
-    t4 = PythonOperator(
-            task_id = 'p_tuning_train',
-            python_callable= p_tuning_training_bcp,
-            op_kwargs= {"org":org_, "ace": ace_},
-            dag = dag
+    # t4 = PythonOperator(
+    #         task_id = 'p_tuning_train',
+    #         python_callable= p_tuning_training_bcp,
+    #         op_kwargs= {"org":org_, "ace": ace_},
+    #         dag = dag
           
-    )
+    # )
 
 t1 >> t2 >> t3 #>> t4
