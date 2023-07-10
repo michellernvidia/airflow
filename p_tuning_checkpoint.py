@@ -42,6 +42,32 @@ def get_token(ti, org, team=None):
              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
         return json.loads(response.text.encode('utf8'))["token"]
 
+
+# def get_token(org=None, team=None):
+#     '''Use the api key set environment variable to generate auth token'''
+#     scope_list = []
+#     scope = f'group/ngc:{org}'
+#     scope_list.append(scope)
+#     if team:
+#         team_scope = f'group/ngc:{org}/{team}'
+#         scope_list.append(team_scope)
+
+#     querystring = {"service": "ngc", "scope": scope_list}
+
+#     auth = '$oauthtoken:{0}'.format(find_api_key())
+#     auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
+#     headers = {
+#         'Authorization': f'Basic {auth}',
+#         'Content-Type': 'application/json',
+#         'Cache-Control': 'no-cache',
+#     }
+#     url = 'https://authn.nvidia.com/token'
+#     response = requests.request("GET", url, headers=headers, params=querystring)
+#     if response.status_code != 200:
+#         raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
+#     return json.loads(response.text.encode('utf8'))["token"]
+
+
 # 2. Download a NeMo checkpoint into a Workspace 
 def create_workspace(ti, org, ace, workspace_name):
         token = ti.xcom_pull(task_ids='token')
