@@ -134,8 +134,11 @@ def download_nemo_checkpoint(ti, org, ace):
             }
       
       job_response_json = ngc_job_request(ti, org, data)#['jobRequestJson']
+      print(f'TYPE: {type(job_response_json)}')
+    #   print(job_response_json['jobRequestJson'])
       job_id = job_response_json['job']['id']
-      status = ngc_job_status(org, job_id)
+      print(f'JOB ID {job_id}')
+      status = ngc_job_status(ti, org, job_id)
       return status
 
 def p_tuning_training_bcp(ti, org, ace):
