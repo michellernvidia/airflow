@@ -20,29 +20,8 @@ ace_=str(ace_v)
 workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 
-## 1. Connect to BCP API
-# def get_token(ti, org, team=None):        
-#         '''Use the api key set environment variable to generate auth token'''
-#         scope = f'group/ngc:{org}'
-#         # if team: #shortens the token if included
-#         #   scope += f'/{team}'
-#         querystring = {"service": "ngc", "scope": scope}
-#         auth = '$oauthtoken:{0}'.format(key_)
-#         auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
-        
-#         headers = {
-#             'Authorization': f'Basic {auth}',
-#             'Content-Type': 'application/json',
-#             'Cache-Control': 'no-cache',
-#          }
-#         url = 'https://authn.nvidia.com/token'
-#         response = requests.request("GET", url, headers=headers, params=querystring)
-#         if response.status_code != 200:
-#              print(response)
-#              raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
-#         return json.loads(response.text.encode('utf8'))["token"]
 
-
+#1. Connect to BCP API
 def get_token(ti, org=None, team=None):
     '''Use the api key set environment variable to generate auth token'''
     scope_list = []
@@ -166,6 +145,7 @@ def download_nemo_checkpoint(ti, org, ace, team=None):
 
       return job_response
 
+# 3. Run p-tuning (training)
 def p_tuning_training_bcp(ti, org, ace, team=None):
       
       #get workspace id
@@ -216,7 +196,7 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
       job_response = ngc_job_request(ti, org, data, team)
       job_id = job_response['job']['id']
 
-      #keep waiting until job completes
+      #keep waiting until job completes on bcp before ending airflow task
       job_status = ngc_job_status(ti, org, job_id)
       while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED':
             time.sleep(20)
@@ -303,12 +283,11 @@ with DAG(
           
     )
 
-    # t4 = PythonOperator(
-    #         task_id = 'p_tuning_train',
-    #         python_callable= p_tuning_training_bcp,
-    #         op_kwargs= {"org":org_, "ace": ace_},
-    #         dag = dag
-          
-    # )
+    t4 = PythonOperator(
+            task_id = 'p_tuning_train',
+            python_callable= p_tuning_training_bcp,
+            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            dag = dag
+    )
 
-t1 >> t2 >> t3 #>> t4
+t1 >> t2 >> t3 >> t4
