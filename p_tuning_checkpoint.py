@@ -199,7 +199,7 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
       #keep waiting until job completes on bcp before ending airflow task
       job_status = ngc_job_status(ti, org, job_id)
       while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED':
-            time.sleep(20)
+            time.sleep(300) #increase wait time to 5 minutes since p-tuning train takes a while
             job_status = ngc_job_status(ti, org, job_id)
             print(job_status)
 
