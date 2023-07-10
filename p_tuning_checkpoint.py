@@ -167,30 +167,29 @@ def p_tuning_training_bcp(ti, org, ace):
 
       job_response_json = ngc_job_request(ti, org, data)
       return job_response_json 
-
-# def p_tuning_training_bcp(ti, org, ace):
-      
+    
+# def p_tuning_bcp_inference(ti, org, ace):
 #       #get workspace id
 #       workspace_response = ti.xcom_pull(task_ids='workspace')
 #       workspace_id = workspace_response['workspace']['id']
 
-#       #actual command to run p-tuning with NeMo framework  
-#       p_tuning_command = "cd ../; python3 opt/NeMo/examples/nlp/language_modeling/megatron_gpt_prompt_learning.py \
-#                                             --config-path=/mount/config/ \
-#                                             --config-name=p_tuning_tutorial_config_modified.yaml \
-#                                             name=p-tuning-gpt3-5b-airflow \
-#                                             trainer.precision=bf16 \
-#                                             trainer.devices=4 \
-#                                             model.language_model_path=/mount/results/gpt_nemo_models/nemo_gpt5B_bf16_tp2.nemo \
-#                                             model.nemo_path=/mount/results/gpt_nemo_models/p_tuned_models/p_tuning_5b.nemo \
-#                                             model.tensor_model_parallel_size=2"
+#       #put together inference cmd - uses example inference p-tuning script already available in NeMo
+#       inference_cmd = "cd ../; python3 opt/NeMo/examples/nlp/language_modeling/megatron_gpt_prompt_learning_eval.py \
+#                                 --config-path=/opt/NeMo/examples/nlp/language_modeling/conf/ \
+#                                 --config-name=megatron_gpt_prompt_learning_inference.yaml \
+#                                 gpt_model_file=/mount/workspace/gpt_models/nemo_gpt5B_bf16_tp2.nemo\
+#                                 virtual_prompt_model_file=/mount/p-tuning-gpt/p_tuned_models/p_tuning_5b.nemo \ //FIX!!!!!!
+#                                 data_paths=['/mount/data/SQuAD/squad_test.jsonl'] \ //FIX!!!!!!!
+#                                 pred_file_path=/mount/p-tuning-gpt/inference_results/5b_inference_results.txt \ //FIX!!!!!!!
+#                                 trainer.devices=2 \
+#                                 tensor_model_parallel_size=2 \
+#                                 pipeline_model_parallel_size=1"
       
 
-      
 #       #job data
 #       data = {
 #                 "name": "p_tuning_train_gpt5b_airflow",
-#                 "aceInstance": "dgxa100.80g.1.norm",
+#                 "aceInstance": "dgxa100.80g.4.norm",
 #                 "aceName": ace,
 #                 "dockerImageName": f"{org}/nemofw-training:23.05-py3",
 #                 "jobOrder": 50,
@@ -206,21 +205,20 @@ def p_tuning_training_bcp(ti, org, ace):
 #                 "userSecretsSpec": [],
 #                 "workspaceMounts": [
 #                     {
-#                         "containerMountPoint": "/mount/data",
+#                         "containerMountPoint": "/mount/workspace",
 #                         "id": workspace_id,
 #                         "mountMode": "RW"
 #                     }
 #                 ],
-#                 "command": p_tuning_command
+#                 "command": inference_cmd_command
 #             } 
 
 #       job_response_json = ngc_job_request(ti, org, data)
-#       return job_response_json     
-
+#       return job_response_json 
 
 ## Define DAG + Tasks
 with DAG(
-         "Download_NeMo_GPT_CKPT", 
+         "P_TUNING_NEMO_BCP", 
          schedule_interval='@daily',
          start_date=datetime(2022, 1, 1),
          catchup=False
