@@ -235,14 +235,14 @@ with DAG(
     t2 = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
-            op_kwargs= {"org":org_, "team": team_, "ace": ace_, "workspace_name": workspace_name_},
+            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_},
             dag = dag
     )
 
     t3 = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
-            op_kwargs= {"org":org_, "team": team_, "ace": ace_},
+            op_kwargs= {"org":org_, "ace": ace_},
             dag = dag
           
     )
