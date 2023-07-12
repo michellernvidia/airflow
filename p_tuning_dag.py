@@ -51,22 +51,17 @@ with DAG(
             op_kwargs={"pretrain_decision": pretrain_decision_},
             dag=dag)
     
-    workspace_task = PythonOperator(
-            task_id = 'create_p_tuning_workspace',
-            python_callable= create_workspace,
-            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_},
-            dag = dag)
 
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
-            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
             dag = dag)
 
     download_the_pile_task = PythonOperator(
             task_id = 'download_pile_dataset',
             python_callable= download_pile_dataset,
-            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
             dag = dag)
 
     train_gpt_task = PythonOperator(
@@ -81,6 +76,6 @@ with DAG(
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
             dag = dag)
 
-token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task]
+token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task
-workspace_task >> download_checkpoint_task >> p_tuning_train_task
+download_checkpoint_task >> p_tuning_train_task

@@ -4,10 +4,10 @@ from ngc_requests import *
 '''Python file containing functions relevant to the path where we 
 load in a nemo checkpoint and validate its successful download'''
 
-def download_nemo_checkpoint(ti, org, ace, team=None):
+def download_nemo_checkpoint(ti, org, ace, workspace_name, team=None):
       
       #get workspace id
-      workspace_response = ti.xcom_pull(task_ids='workspace')
+      workspace_response = create_workspace(ti, org, ace, workspace_name)
       workspace_id = workspace_response['workspace']['id']
       
       #ngc job parameters
@@ -32,6 +32,6 @@ def download_nemo_checkpoint(ti, org, ace, team=None):
             job_status = ngc_job_status(ti, org, job_id)
             print(job_status)
 
-      return job_response
+      return job_response, workspace_id
 
  

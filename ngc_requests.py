@@ -25,7 +25,6 @@ def get_token(ti, key, org=None, team=None):
     return json.loads(response.text.encode('utf8'))["token"]
 
 
-# 2. Download a NeMo checkpoint into a Workspace 
 def create_workspace(ti, org, ace, workspace_name):
         token = ti.xcom_pull(task_ids='token')
         print(f"Xcom pull gives me {token}")
@@ -50,8 +49,10 @@ def create_workspace(ti, org, ace, workspace_name):
         return response.json()
 
 
+# NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
 def ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
-                    workspace_mount_path, workspace_id, job_command, team=None):
+                    workspace_mount_path, workspace_id, job_command, team=None, \
+                    multinode=False, array_type=None, total_runtime=None):
       '''Creates an NGC job request via API'''
       token = ti.xcom_pull(task_ids='token')
       if team:
@@ -60,31 +61,63 @@ def ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, rep
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
       headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
-      data = {
-                "name": job_name,
-                "aceInstance": ace_instance,
-                "aceName": ace_name,
-                "dockerImageName": docker_image,
-                "jobOrder": 50,
-                "jobPriority": "NORMAL",
-                "replicaCount": replica_count,
-                "reservedLabels": [],
-                "resultContainerMountPoint": "/results",
-                "runPolicy": {
-                    "preemptClass": "RUNONCE"
-                },
-                "systemLabels": [],
-                "userLabels": [],
-                "userSecretsSpec": [],
-                "workspaceMounts": [
-                    {
-                        "containerMountPoint": workspace_mount_path,
-                        "id": workspace_id,
-                        "mountMode": "RW"
-                    }
-                ],
-                "command": job_command
-            } 
+
+      if multinode:
+          data = {
+                    "name": job_name,
+                    "aceInstance": ace_instance,
+                    "aceName": ace_name,
+                    "dockerImageName": docker_image,
+                    "jobOrder": 50,
+                    "jobPriority": "NORMAL",
+                    "replicaCount": replica_count,
+                    "reservedLabels": [],
+                    "resultContainerMountPoint": "/results",
+                    "runPolicy": {
+                        "preemptClass": "RUNONCE"
+                    },
+                    "systemLabels": [],
+                    "userLabels": [],
+                    "userSecretsSpec": [],
+                    "workspaceMounts": [
+                        {
+                            "containerMountPoint": workspace_mount_path,
+                            "id": workspace_id,
+                            "mountMode": "RW"
+                        }
+                    ],
+                    "command": job_command,
+                    "arrayType": array_type,
+                    "totalRuntime": total_runtime
+                }
+          
+      else:
+          data = {
+                    "name": job_name,
+                    "aceInstance": ace_instance,
+                    "aceName": ace_name,
+                    "dockerImageName": docker_image,
+                    "jobOrder": 50,
+                    "jobPriority": "NORMAL",
+                    "replicaCount": replica_count,
+                    "reservedLabels": [],
+                    "resultContainerMountPoint": "/results",
+                    "runPolicy": {
+                        "preemptClass": "RUNONCE"
+                    },
+                    "systemLabels": [],
+                    "userLabels": [],
+                    "userSecretsSpec": [],
+                    "workspaceMounts": [
+                        {
+                            "containerMountPoint": workspace_mount_path,
+                            "id": workspace_id,
+                            "mountMode": "RW"
+                        }
+                    ],
+                    "command": job_command
+                }
+    
       response = requests.request("POST", url, headers=headers, data=json.dumps(data))
       if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))

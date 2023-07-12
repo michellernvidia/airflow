@@ -4,15 +4,14 @@ from ngc_requests import *
 
 def p_tuning(ti, pretrain_decision):
     if pretrain_decision == "False":
-        return 'create_workspace'
+        return 'download_nemo_checkpoint'
     else:
         return 'download_pile_dataset'
     
 def p_tuning_training_bcp(ti, org, ace, team=None):
       
       #get workspace id
-      workspace_response = ti.xcom_pull(task_ids='workspace')
-      workspace_id = workspace_response['workspace']['id']      
+      _, workspace_id = ti.xcom_pull(task_ids='download_nemo_checkpoint')
       
       #ngc job parameters
       job_name = "p_tuning_train_gpt5b_airflow"
