@@ -77,6 +77,6 @@ with DAG(
             dag = dag)
 
 token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
-download_the_pile_task >> train_gpt_task
-download_checkpoint_task >> p_tuning_train_task >> train_gpt_task
+download_the_pile_task >> train_gpt_task >> p_tuning_train_task
+download_checkpoint_task >> p_tuning_train_task 
 
