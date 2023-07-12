@@ -13,7 +13,7 @@ def start_func(ti):
 
 
 def branch_func(ti):
-    xcom_value = 10
+    xcom_value = 1
     if xcom_value >= 5:
         return 'continue_task'
     else:
