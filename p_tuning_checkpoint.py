@@ -253,13 +253,13 @@ with DAG(
           
     )
 
-    # p_tuning_train_task = PythonOperator(
-    #         task_id = 'p_tuning_train',
-    #         python_callable= p_tuning_training_bcp,
-    #         op_kwargs= {"org":org_, "ace": ace_, "team": team_},
-    #         dag = dag
-    # )
+    p_tuning_train_task = PythonOperator(
+            task_id = 'p_tuning_train',
+            python_callable= p_tuning_training_bcp,
+            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            dag = dag
+    )
 
 # t1 >> t2 >> t3 >> t4
 token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task]
-workspace_task >> download_checkpoint_task
+workspace_task >> download_checkpoint_task >> p_tuning_train_task
