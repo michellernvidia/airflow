@@ -129,7 +129,7 @@ def ngc_job_status(ti, org, job_id):
 
 
 def choose_pretrain_path(ti):
-    if pretrain_decision_ == False:
+    if pretrain_decision_ == "False":
         return 'download_nemo_checkpoint'
     else:
         return 'download_pile_dataset'
