@@ -1,0 +1,55 @@
+  #   #define job specifics
+    #   data = {
+    #             "name": "airflow_download_gpt3_5b_ckpt",
+    #             "aceInstance": "dgxa100.80g.1.norm",
+    #             "aceName": ace,
+    #             "dockerImageName": f"{org}/nemofw-training:23.05-py3",
+    #             "jobOrder": 50,
+    #             "jobPriority": "NORMAL",
+    #             "replicaCount": 1,
+    #             "reservedLabels": [],
+    #             "resultContainerMountPoint": "/results",
+    #             "runPolicy": {
+    #                 "preemptClass": "RUNONCE"
+    #             },
+    #             "systemLabels": [],
+    #             "userLabels": [],
+    #             "userSecretsSpec": [],
+    #             "workspaceMounts": [
+    #                 {
+    #                     "containerMountPoint": "/mount/data",
+    #                     "id": workspace_id,
+    #                     "mountMode": "RW"
+    #                 }
+    #             ],
+    #             "command": "cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
+    #                 wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
+    #         }
+
+
+    #job data
+      data = {
+                "name": "p_tuning_train_gpt5b_airflow",
+                "aceInstance": "dgxa100.80g.4.norm",
+                "aceName": ace,
+                "dockerImageName": f"{org}/nemofw-training:23.05-py3",
+                "jobOrder": 50,
+                "jobPriority": "NORMAL",
+                "replicaCount": 1,
+                "reservedLabels": [],
+                "resultContainerMountPoint": "/results",
+                "runPolicy": {
+                    "preemptClass": "RUNONCE"
+                },
+                "systemLabels": [],
+                "userLabels": [],
+                "userSecretsSpec": [],
+                "workspaceMounts": [
+                    {
+                        "containerMountPoint": "/mount/workspace",
+                        "id": workspace_id,
+                        "mountMode": "RW"
+                    }
+                ],
+                "command": p_tuning_command
+            } 
