@@ -209,6 +209,11 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
 def download_pile_dataset(ti, org, ace, team=None):
      return
 
+
+def train_gpt_model(ti, org, ace, team=None):
+     return
+
+
 ## Define DAG + Tasks
 with DAG(
          "P_TUNING_NEMO_BCP", 
@@ -253,6 +258,12 @@ with DAG(
           
     )
 
+    train_gpt_task = PythonOperator(
+            task_id = 'train_gpt_model',
+            python_callable= train_gpt_model,
+            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            dag = dag)
+
     p_tuning_train_task = PythonOperator(
             task_id = 'p_tuning_train',
             python_callable= p_tuning_training_bcp,
@@ -262,4 +273,5 @@ with DAG(
 
 # t1 >> t2 >> t3 >> t4
 token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task]
+download_the_pile_task >> train_gpt_task
 workspace_task >> download_checkpoint_task >> p_tuning_train_task
