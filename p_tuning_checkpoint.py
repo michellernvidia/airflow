@@ -132,7 +132,7 @@ def choose_pretrain_path(ti):
     if pretrain_decision_ == False:
         return 'download_nemo_checkpoint'
     else:
-        return 'pretrain_gpt_model'
+        return 'download_pile_dataset'
     
 
 def download_nemo_checkpoint(ti, org, ace, team=None):
