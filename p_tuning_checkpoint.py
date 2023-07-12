@@ -49,7 +49,13 @@ def get_token(ti, org=None, team=None):
         raise Exception("HTTP Error %d: from %s" % (response.status_code, url))
     return json.loads(response.text.encode('utf8'))["token"]
 
-
+# 1.1 Decide p-tuning path
+def p_tuning(ti):
+    if pretrain_decision_ == "False":
+        return 'create_workspace'
+    else:
+        return 'download_pile_dataset'
+    
 # 2. Download a NeMo checkpoint into a Workspace 
 def create_workspace(ti, org, ace, workspace_name):
         token = ti.xcom_pull(task_ids='token')
@@ -127,13 +133,6 @@ def ngc_job_status(ti, org, job_id):
     job_info = response.json()
     return job_info['job']['jobStatus']['status']
 
-
-def choose_pretrain_path(ti):
-    if pretrain_decision_ == "False":
-        return 'download_nemo_checkpoint'
-    else:
-        return 'download_pile_dataset'
-    
 
 def download_nemo_checkpoint(ti, org, ace, team=None):
       
@@ -225,6 +224,12 @@ with DAG(
             dag = dag
     ) 
 
+    pretrain_decision_task = BranchPythonOperator(
+            task_id='p_tuning',
+            provide_context=True,
+            python_callable=p_tuning,
+            dag=dag)
+    
     workspace_task = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
@@ -232,12 +237,6 @@ with DAG(
             dag = dag
     )
 
-    pretrain_decision_task = BranchPythonOperator(
-            task_id='decide_pretrain_LLM',
-            provide_context=True,
-            python_callable=choose_pretrain_path,
-            dag=dag)
-    
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
@@ -262,4 +261,4 @@ with DAG(
     # )
 
 # t1 >> t2 >> t3 >> t4
-token_task >> workspace_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
+token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task] >>  download_checkpoint_task
