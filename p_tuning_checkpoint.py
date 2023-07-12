@@ -261,4 +261,5 @@ with DAG(
     # )
 
 # t1 >> t2 >> t3 >> t4
-token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task] >>  download_checkpoint_task.set_upstream(workspace_task)
+token_task >> pretrain_decision_task >> [workspace_task, download_the_pile_task]
+workspace_task >> download_checkpoint_task
