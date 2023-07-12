@@ -6,6 +6,12 @@ from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 from airflow import DAG
 
+
+def start_func(ti):
+    print('Starting!!!!!!!!!')
+    return
+
+
 def branch_func(ti):
     xcom_value = 10
     if xcom_value >= 5:
@@ -13,6 +19,13 @@ def branch_func(ti):
     else:
         return 'stop_task'
 
+def continue_func(ti):
+    print('CONTINUING')
+    return
+
+def stop_func(ti):
+    print('STOPPING')
+    return
 
 with DAG(
          "BRANCHING", 
@@ -21,11 +34,11 @@ with DAG(
          catchup=False
     ) as dag:
 
-    start_op = BashOperator(
-                    task_id='start_task',
-                    bash_command="echo 5",
-                    xcom_push=True,
-                    dag=dag)
+    
+    start_op = PythonOperator(
+            task_id = 'start_task',
+            python_callable=start_func,
+            dag = dag)
 
     branch_op = BranchPythonOperator(
                     task_id='branch_task',
@@ -33,7 +46,12 @@ with DAG(
                     python_callable=branch_func,
                     dag=dag)
 
-    continue_op = DummyOperator(task_id='continue_task', dag=dag)
-    stop_op = DummyOperator(task_id='stop_task', dag=dag)
+    continue_op = PythonOperator(task_id='continue_task', 
+                                 python_callable=continue_func,
+                                 dag=dag)
+    
+    stop_op = PythonOperator(task_id='stop_task', 
+                             python_callable=stop_func,
+                             dag=dag)
 
 start_op >> branch_op >> [continue_op, stop_op]
