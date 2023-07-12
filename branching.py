@@ -3,7 +3,7 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 
-import datetime
+from datetime import datetime
 from airflow import DAG
 
 def branch_func(**kwargs):
