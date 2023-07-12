@@ -1,11 +1,4 @@
-import os, json, base64, requests, time
-from datetime import datetime
-from airflow import DAG
-from airflow.decorators import task
-from airflow.operators.python import PythonOperator
-from airflow.operators.python import BranchPythonOperator
-from airflow.models import Variable
-
+import time
 from ngc_requests import *
 
 
