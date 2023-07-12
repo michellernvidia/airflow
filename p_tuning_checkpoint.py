@@ -3,6 +3,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.decorators import task
 from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator
 from airflow.models import Variable
 
 ## 0. Variables
@@ -12,6 +13,7 @@ team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
 workspace_name_v = Variable.get("workspace_name_v", deserialize_json=True)
 nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
+pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 
 key_= str(key_v)
 org_=str(org_v)
@@ -19,6 +21,7 @@ team_= str(team_v)
 ace_=str(ace_v)
 workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
+pretrain_decision_ = str(pretrain_decision_v)
 
 
 #1. Connect to BCP API
@@ -125,6 +128,13 @@ def ngc_job_status(ti, org, job_id):
     return job_info['job']['jobStatus']['status']
 
 
+def choose_pretrain_path(ti):
+    if pretrain_decision_ == False:
+        return 'download_nemo_checkpoint'
+    else:
+        return 'pretrain_gpt_model'
+    
+
 def download_nemo_checkpoint(ti, org, ace, team=None):
       
       #get workspace id
@@ -196,25 +206,9 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
 
       return job_response 
     
-# def p_tuning_bcp_inference(ti, org, ace):
-#       #get workspace id
-#       workspace_response = ti.xcom_pull(task_ids='workspace')
-#       workspace_id = workspace_response['workspace']['id']
 
-#       #put together inference cmd - uses example inference p-tuning script already available in NeMo
-#       inference_cmd = "cd ../; python3 opt/NeMo/examples/nlp/language_modeling/megatron_gpt_prompt_learning_eval.py \
-#                                 --config-path=/opt/NeMo/examples/nlp/language_modeling/conf/ \
-#                                 --config-name=megatron_gpt_prompt_learning_inference.yaml \
-#                                 gpt_model_file=/mount/workspace/gpt_models/nemo_gpt5B_bf16_tp2.nemo\
-#                                 virtual_prompt_model_file=/mount/p-tuning-gpt/p_tuned_models/p_tuning_5b.nemo \ //FIX!!!!!!
-#                                 data_paths=['/mount/data/SQuAD/squad_test.jsonl'] \ //FIX!!!!!!!
-#                                 pred_file_path=/mount/p-tuning-gpt/inference_results/5b_inference_results.txt \ //FIX!!!!!!!
-#                                 trainer.devices=2 \
-#                                 tensor_model_parallel_size=2 \
-#                                 pipeline_model_parallel_size=1"
-
-#       job_response_json = ngc_job_request(ti, org, data)
-#       return job_response_json 
+def download_pile_dataset(ti, org, ace, team=None):
+     return
 
 ## Define DAG + Tasks
 with DAG(
@@ -224,21 +218,27 @@ with DAG(
          catchup=False
     ) as dag:
 
-    t1 = PythonOperator(
+    token_task = PythonOperator(
             task_id = 'token',
             python_callable=get_token,
             op_kwargs={"org": org_ , "team": team_},
             dag = dag
     ) 
 
-    t2 = PythonOperator(
+    workspace_task = PythonOperator(
             task_id = 'workspace',
             python_callable= create_workspace,
             op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_},
             dag = dag
     )
 
-    t3 = PythonOperator(
+    pretrain_decision_task = BranchPythonOperator(
+            task_id='decide_pretrain_LLM',
+            provide_context=True,
+            python_callable=choose_pretrain_path,
+            dag=dag)
+    
+    download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
@@ -246,11 +246,20 @@ with DAG(
           
     )
 
-    t4 = PythonOperator(
-            task_id = 'p_tuning_train',
-            python_callable= p_tuning_training_bcp,
+    download_the_pile_task = PythonOperator(
+            task_id = 'download_pile_dataset',
+            python_callable= download_pile_dataset,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
             dag = dag
+          
     )
 
-t1 >> t2 >> t3 >> t4
+    # p_tuning_train_task = PythonOperator(
+    #         task_id = 'p_tuning_train',
+    #         python_callable= p_tuning_training_bcp,
+    #         op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+    #         dag = dag
+    # )
+
+# t1 >> t2 >> t3 >> t4
+token_task >> workspace_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
