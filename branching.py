@@ -6,9 +6,8 @@ from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 from airflow import DAG
 
-def branch_func(**kwargs):
-    ti = kwargs['ti']
-    xcom_value = int(ti.xcom_pull(task_ids='start_task'))
+def branch_func(ti):
+    xcom_value = 10
     if xcom_value >= 5:
         return 'continue_task'
     else:
