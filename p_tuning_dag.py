@@ -45,9 +45,9 @@ with DAG(
     ) 
 
     pretrain_decision_task = BranchPythonOperator(
-            task_id='p_tuning',
+            task_id='get_base_model',
             provide_context=True,
-            python_callable=p_tuning,
+            python_callable=get_base_model,
             op_kwargs={"pretrain_decision": pretrain_decision_},
             dag=dag)
     
@@ -74,6 +74,7 @@ with DAG(
             task_id = 'p_tuning_train',
             python_callable= p_tuning_training_bcp,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            depends_on_past=False,
             dag = dag)
 
 token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]

@@ -12,6 +12,12 @@ from airflow.models import Variable
 from ngc_requests import create_workspace, ngc_job_request, ngc_job_status
 
 
+def get_base_model(ti, pretrain_decision):
+    if pretrain_decision == "False":
+        return 'download_nemo_checkpoint'
+    else:
+        return 'download_pile_dataset'
+
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
 def download_pile_dataset(ti, org, ace, team=None):
      return
@@ -57,3 +63,34 @@ def download_pile_dataset(ti, org, ace, team=None):
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
 def train_gpt_model(ti, org, ace, team=None):
      return
+
+     # ngc batch run \
+     #       --name "gpt3-training-5b-bf16" \
+     #       --org tzcwjedpb1di \
+     #       --team rusteze \
+     #       --ace launchpad-iad2-ace \
+     #       --instance dgxa100.80g.8.norm \
+     #       --image "nvcr.io/tzcwjedpb1di/nemofw-training:23.05-py3" \
+     #       --result /results \
+     #       --workspace dL_-JJeZQ9KbnWB6u0QFhw:/mount_workspace:RW \
+     #       --total-runtime 5D \
+     #       --replicas 8 \
+     #       --array-type PYTORCH \
+     #       --commandline "\
+     #       set -x && \
+     #       python3 /opt/NeMo-Megatron-Launcher/launcher_scripts/main.py \
+     #         cluster_type=bcp \
+     #         stages=[training] \
+     #         training=gpt3/5b \
+     #         training_config=gpt3/5b \
+     #         launcher_scripts_path=/opt/NeMo-Megatron-Launcher/launcher_scripts \
+     #         data_dir=/mount_workspace/data \
+     #         base_results_dir=/mount_workspace/results \
+     #         training.run.time_limit=\"5-00:00:00\" \
+     #         training.trainer.max_time=\"4:23:30:00\" \
+     #         training.trainer.num_nodes=\${NGC_ARRAY_SIZE} \
+     #         training.model.tokenizer.vocab_file=/mount_workspace/data/bpe/vocab.json \
+     #         training.model.tokenizer.merge_file=/mount_workspace/data/bpe/merges.txt \
+     #         > >(tee -a /results/train_log.log) \
+     #         2> >(tee -a /results/train_stderr.log >&2) && \
+     #       rsync -P -rvh /mount_workspace/results /results"

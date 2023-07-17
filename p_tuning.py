@@ -1,12 +1,6 @@
 import time
 from ngc_requests import *
 
-
-def p_tuning(ti, pretrain_decision):
-    if pretrain_decision == "False":
-        return 'download_nemo_checkpoint'
-    else:
-        return 'download_pile_dataset'
     
 def p_tuning_training_bcp(ti, org, ace, team=None):
       
