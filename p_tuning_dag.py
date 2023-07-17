@@ -5,6 +5,7 @@ from airflow.decorators import task
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 from airflow.models import Variable
+from airflow.utils.trigger_rule import TriggerRule
 
 from ngc_requests import *
 from nemo_checkpoint import *
@@ -74,7 +75,7 @@ with DAG(
             task_id = 'p_tuning_train',
             python_callable= p_tuning_training_bcp,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
-            depends_on_past=False,
+            trigger_rule=TriggerRule.ONE_SUCCESS, 
             dag = dag)
 
 token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
