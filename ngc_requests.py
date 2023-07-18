@@ -132,6 +132,7 @@ def ngc_job_status(ti, org, job_id):
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
     response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
+        print('JOB STATUS RESPONSE', response)
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     job_info = response.json()
     return job_info['job']['jobStatus']['status']
