@@ -23,7 +23,7 @@ pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 
 key_= str(key_v)
 org_=str(org_v)
-team_= str(team_v)
+team_= None #str(team_v)
 ace_=str(ace_v)
 workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
