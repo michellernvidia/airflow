@@ -38,10 +38,11 @@ with DAG(
          catchup=False
     ) as dag:
 
+# op_kwargs={"key": key_, "org": org_ , "team": team_},
     token_task = PythonOperator(
             task_id = 'token',
             python_callable=get_token,
-            op_kwargs={"key": key_, "org": org_ , "team": team_},
+            op_kwargs={"key": key_, "org": org_ },
             dag = dag
     ) 
 
@@ -75,7 +76,7 @@ with DAG(
             task_id = 'p_tuning_train',
             python_callable= p_tuning_training_bcp,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
-            trigger_rule=TriggerRule.ONE_SUCCESS, 
+            trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
 
 token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
