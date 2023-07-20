@@ -38,18 +38,7 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
       docker_image = f"{org}/nemofw-training:23.05-py3"
       replica_count = 1
       workspace_mount_path = "/mount/workspace"
-      job_command = "python3 /opt/NeMo-Megatron-Launcher/launcher_scripts/main.py \
-                            prompt_learning=gpt3/squad \
-                            stages=[prompt_learning] \
-                            cluster_type=bcp \
-                            launcher_scripts_path=/opt/NeMo-Megatron-Launcher/launcher_scripts \
-                            data_dir=/mount/workspace \
-                            base_results_dir=/mount/workspace/results \
-                            prompt_learning.run.model_train_name=gpt3_5b \
-                            prompt_learning.trainer.devices=4 \
-                            prompt_learning.model.language_model_path=/mount/workspace/gpt_models/nemo_gpt5B_bf16_tp2.nemo \
-                            prompt_learning.model.tensor_model_parallel_size=2 \
-                            >> /results/prompt_learning_gpt3_log.txt 2>&1"
+      job_command = "jupyter lab --ip=0.0.0.0 --allow-root --no-browser --NotebookApp.token='' --notebook-dir=/ --NotebookApp.allow_origin='*'" 
       
       #send ngc job request
       job_response = ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, \
