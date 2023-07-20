@@ -54,22 +54,29 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
       #send ngc job request
       job_response = ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, \
                                      replica_count, workspace_mount_path, workspace_id, job_command, team=team)
-
-      #wait for job to complete on BCP before allowing airflow to "finish" task
       job_id = job_response['job']['id']
-      job_status = ngc_job_status(ti, org, job_id)
-      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
-            time.sleep(300) #increase wait time to 5 mins
-            job_status = ngc_job_status(ti, org, job_id)
-            print(job_status)
 
-      return job_response
-    
+      return job_response, job_id
+
+
+def wait_for_job_completion(ti, org, team=None):
+
+     job_id = ti.xcom_pull(task_ids='p_tuning_train')
+     job_status = ngc_job_status(ti, org, job_id)
+
+     min=0
+     while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
+         time.sleep(300) #increase wait time to 5 mins
+         job_status = ngc_job_status(ti, org, job_id)
+         print(f'minute: {min} | Job status: ', job_status)
+         min += 5
+     return job_status
+
+
 ## Define DAG + Tasks
 with DAG(
          "P_TUNING_DEBUG_JOB_STATUS", 
-         schedule_interval='@daily',
-         start_date=datetime(2022, 1, 1),
+         schedule_interval='None',
          catchup=False
     ) as dag:
 
@@ -86,5 +93,11 @@ with DAG(
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
             trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
+    
+    wait_task = PythonOperator(
+            task_id = 'wait_for_job_completion',
+            python_callable= wait_for_job_completion,
+            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            dag = dag)
 
-token_task >> p_tuning_train_task
+token_task >> p_tuning_train_task >> wait_task
