@@ -1,5 +1,10 @@
 import json, base64, requests, time
 
+
+##api key. don't steal pls. 
+KEY = "bGxzOGN0NThja25jbGhhMWduaW5ya3ZuMTM6YjcxMWE5ZWItMjdmNC00MTA5LWI5NmItMTkzNDJiMzg0ZjFk"
+
+
 def get_token(ti, key, org=None, team=None):
     '''Use the api key set environment variable to generate auth token'''
     scope_list = []
@@ -127,7 +132,11 @@ def ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, rep
 def ngc_job_status(ti, org, job_id):
     '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
     
-    token = ti.xcom_pull(task_ids='token')
+    # token = ti.xcom_pull(task_ids='token')
+    #because we will have to get the ngc job status continously, we have to 
+    #get a new token each time to make sure the token doesn't expire
+    token = get_token(ti, key=KEY, org=org, team=None)
+
     print(f'TOKEN: {token}')
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{job_id}'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
