@@ -61,7 +61,7 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
 
 def wait_for_job_completion(ti, org, team=None):
 
-     job_id = ti.xcom_pull(task_ids='p_tuning_train')
+     _, job_id = ti.xcom_pull(task_ids='p_tuning_train')
      job_status = ngc_job_status(ti, org, job_id)
 
      min=0
