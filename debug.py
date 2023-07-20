@@ -76,7 +76,8 @@ def wait_for_job_completion(ti, org, team=None):
 ## Define DAG + Tasks
 with DAG(
          "P_TUNING_DEBUG_JOB_STATUS", 
-         schedule_interval='None',
+         schedule_interval='@once',
+         start_date=datetime(2022, 1, 1),
          catchup=False
     ) as dag:
 
