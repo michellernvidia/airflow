@@ -26,13 +26,13 @@ workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 
-def p_tuning_training_bcp(ti, org, ace, team=None):
+def bcp_job_launch(ti, org, ace, team=None):
       
       #get workspace id
       workspace_id = 'BZQLetfySFuBjdIHee6fLg' #anotha-airflow-wksp
       
       #ngc job parameters
-      job_name = "p_tune_airflow_debug"
+      job_name = "airflow_job_status_debug"
       ace_instance = "dgxa100.80g.4.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.05-py3"
@@ -50,7 +50,7 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
 
 def wait_for_job_completion(ti, org, team=None):
 
-     _, job_id = ti.xcom_pull(task_ids='p_tuning_train')
+     _, job_id = ti.xcom_pull(task_ids='bcp_job_launch')
      job_status = ngc_job_status(ti, org, job_id)
 
      min=0
@@ -65,7 +65,7 @@ def wait_for_job_completion(ti, org, team=None):
 
 ## Define DAG + Tasks
 with DAG(
-         "P_TUNING_DEBUG_JOB_STATUS", 
+         "BCP_DEBUG_JOB_STATUS", 
          schedule_interval='@once',
          start_date=datetime(2022, 1, 1),
          catchup=False
@@ -78,9 +78,9 @@ with DAG(
             dag = dag
     ) 
 
-    p_tuning_train_task = PythonOperator(
-            task_id = 'p_tuning_train',
-            python_callable= p_tuning_training_bcp,
+    bcp_job_launch_task = PythonOperator(
+            task_id = 'bcp_job_launch',
+            python_callable= bcp_job_launch,
             op_kwargs= {"org":org_, "ace": ace_, "team": team_},
             trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
@@ -91,4 +91,4 @@ with DAG(
             op_kwargs= {"org":org_, "team": team_},
             dag = dag)
 
-token_task >> p_tuning_train_task >> wait_task
+token_task >> bcp_job_launch_task >> wait_task
