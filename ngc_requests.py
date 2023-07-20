@@ -1,4 +1,4 @@
-import json, base64, requests
+import json, base64, requests, time
 
 def get_token(ti, key, org=None, team=None):
     '''Use the api key set environment variable to generate auth token'''
@@ -128,6 +128,7 @@ def ngc_job_status(ti, org, job_id):
     '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
     
     token = ti.xcom_pull(task_ids='token')
+    print(f'TOKEN: {token}')
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{job_id}'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
     response = requests.request("GET", url, headers=headers)
@@ -136,3 +137,26 @@ def ngc_job_status(ti, org, job_id):
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     job_info = response.json()
     return job_info['job']['jobStatus']['status']
+
+
+def wait_for_job_completion(ti, org, job_response, wait_time, team=None):
+    '''Continually gets NGC job status every `wait_time` seconds until 
+    the job finishes, is killed, or fails'''
+    
+    job_id = job_response['job']['id']
+    job_status = ngc_job_status(ti, org, job_id)
+    min=0
+    while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
+        time.sleep(wait_time)
+        min+=5
+        job_status=ngc_job_status(ti, org, job_id)
+        print(f'minute: {min} | Job status: ', job_status)
+    
+    return job_status
+
+    # job_id = job_response['job']['id']
+    # job_status = ngc_job_status(ti, org, job_id)
+    # while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
+    #         time.sleep(20)
+    #         job_status = ngc_job_status(ti, org, job_id)
+    #         print(job_status)

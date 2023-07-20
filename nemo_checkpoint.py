@@ -25,12 +25,11 @@ def download_nemo_checkpoint(ti, org, ace, workspace_name, team=None):
                                      replica_count, workspace_mount_path, workspace_id, job_command, team=team)
       
       #wait for job to complete on BCP before allowing airflow to "finish" task
-      job_id = job_response['job']['id']
-      job_status = ngc_job_status(ti, org, job_id)
-      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
-            time.sleep(20)
-            job_status = ngc_job_status(ti, org, job_id)
-            print(job_status)
+      final_job_status = wait_for_job_completion(ti,
+                                                 org, 
+                                                 job_response, 
+                                                 wait_time=15, 
+                                                 team=team)
 
       return job_response, workspace_id
 

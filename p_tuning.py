@@ -32,11 +32,10 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
                                      replica_count, workspace_mount_path, workspace_id, job_command, team=team)
 
       #wait for job to complete on BCP before allowing airflow to "finish" task
-      job_id = job_response['job']['id']
-      job_status = ngc_job_status(ti, org, job_id)
-      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
-            time.sleep(300) #increase wait time to 5 mins
-            job_status = ngc_job_status(ti, org, job_id)
-            print(job_status)
+      final_job_status = wait_for_job_completion(ti,
+                                                 org, 
+                                                 job_response, 
+                                                 wait_time=300, 
+                                                 team=team)
 
       return job_response
