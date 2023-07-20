@@ -55,8 +55,8 @@ def wait_for_job_completion(ti, org, team=None):
 
      min=0
      while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
-         time.sleep(30) #increase wait time to 5 mins
-         min += 5
+         time.sleep(60) #increase wait time to 5 mins
+         min += 1
          job_status = ngc_job_status(ti, org, job_id)
          print(f'minute: {min} | Job status: ', job_status)
      return job_status
