@@ -2,10 +2,9 @@ import json, base64, requests, time
 
 
 ##api key. don't steal pls. 
-KEY = "bGxzOGN0NThja25jbGhhMWduaW5ya3ZuMTM6YjcxMWE5ZWItMjdmNC00MTA5LWI5NmItMTkzNDJiMzg0ZjFk"
+# KEY = "bGxzOGN0NThja25jbGhhMWduaW5ya3ZuMTM6YjcxMWE5ZWItMjdmNC00MTA5LWI5NmItMTkzNDJiMzg0ZjFk"
 
-
-def get_token(ti, key, org=None, team=None):
+def get_token(ngc_api_key, org=None, team=None):
     '''Use the api key set environment variable to generate auth token'''
     scope_list = []
     scope = f'group/ngc:{org}'
@@ -16,7 +15,7 @@ def get_token(ti, key, org=None, team=None):
 
     querystring = {"service": "ngc", "scope": scope_list}
 
-    auth = '$oauthtoken:{0}'.format(key)
+    auth = '$oauthtoken:{0}'.format(ngc_api_key)
     auth = base64.b64encode(auth.encode('utf-8')).decode('utf-8')
     headers = {
         'Authorization': f'Basic {auth}',
@@ -30,9 +29,9 @@ def get_token(ti, key, org=None, team=None):
     return json.loads(response.text.encode('utf8'))["token"]
 
 
-def create_workspace(ti, org, ace, workspace_name):
-        token = ti.xcom_pull(task_ids='token')
-        print(f"Xcom pull gives me {token}")
+def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
+        
+        token = get_token(ngc_api_key, org)
         
         '''Create a workspace in a given org for the authenticated user'''
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
@@ -48,18 +47,19 @@ def create_workspace(ti, org, ace, workspace_name):
          }
         response = requests.request("POST", url, headers=headers, data=json.dumps(data))
         if response.status_code != 200:
-            print(response)
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
         
         return response.json()
 
 
 # NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
-def ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
+def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
                     workspace_mount_path, workspace_id, job_command, team=None, \
                     multinode=False, array_type=None, total_runtime=None):
       '''Creates an NGC job request via API'''
-      token = ti.xcom_pull(task_ids='token')
+      
+      token = get_token(ngc_api_key, org, team)
+      
       if team:
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
       else:
@@ -129,37 +129,32 @@ def ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, rep
       return response.json()
 
 
-def ngc_job_status(ti, org, job_id):
+def ngc_job_status(ti, ngc_api_key, org, job_id):
     '''Gets status of NGC Job (e.g., SUCCESS, FAILED, CREATED, etc.)'''
     
-    # token = ti.xcom_pull(task_ids='token')
     #because we will have to get the ngc job status continously, we have to 
-    #get a new token each time to make sure the token doesn't expire
-    token = get_token(ti, key=KEY, org=org, team=None)
+    #get a new token each time to make sure the token doesn't expire, so we can't use ti.xcom_pull
+    token = get_token(ngc_api_key, org)
 
-    print(f'NEW TOKEN: {token}')
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/{job_id}'
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
     response = requests.request("GET", url, headers=headers)
     if response.status_code != 200:
-        print('JOB STATUS RESPONSE is not 200. This is wot we got: ', response)
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     job_info = response.json()
     return job_info['job']['jobStatus']['status']
 
 
-def wait_for_job_completion(ti, org, job_response, wait_time, team=None):
+def wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time, team=None):
     '''Continually gets NGC job status every `wait_time` seconds until 
     the job finishes, is killed, or fails'''
     
     job_id = job_response['job']['id']
-    job_status = ngc_job_status(ti, org, job_id)
+    job_status = ngc_job_status(ti, ngc_api_key, org, job_id)
     
-    min=0
     while job_status != 'FINISHED_SUCCESS' and job_status != 'FAILED' and job_status != 'KILLED_BY_USER':
         time.sleep(wait_time)
-        min+=5
-        job_status=ngc_job_status(ti, org, job_id)
-        print(f'minute: {min} | Job status: ', job_status)
+        job_status=ngc_job_status(ti, ngc_api_key, org, job_id)
+        print(f'Job status: ', job_status)
     
     return job_status

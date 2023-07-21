@@ -2,7 +2,7 @@ import time
 from ngc_requests import *
 
     
-def p_tuning_training_bcp(ti, org, ace, team=None):
+def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
       
       #get workspace id
       _, workspace_id = ti.xcom_pull(task_ids='download_nemo_checkpoint')
@@ -28,11 +28,12 @@ def p_tuning_training_bcp(ti, org, ace, team=None):
                             >> /results/prompt_learning_gpt3_log.txt 2>&1"
       
       #send ngc job request
-      job_response = ngc_job_request(ti, org, job_name, ace_instance, ace_name, docker_image, \
+      job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
                                      replica_count, workspace_mount_path, workspace_id, job_command, team=team)
 
       #wait for job to complete on BCP before allowing airflow to "finish" task
       final_job_status = wait_for_job_completion(ti,
+                                                 ngc_api_key,
                                                  org, 
                                                  job_response, 
                                                  wait_time=300, 

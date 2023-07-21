@@ -19,7 +19,7 @@ def get_base_model(ti, pretrain_decision):
         return 'download_pile_dataset'
 
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
-def download_pile_dataset(ti, org, ace, team=None):
+def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
      return
      
     #  #create workspace to download the pile dataset into
@@ -61,7 +61,7 @@ def download_pile_dataset(ti, org, ace, team=None):
     #  return job_response
 
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
-def train_gpt_model(ti, org, ace, team=None):
+def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
      return
 
      # ngc batch run \

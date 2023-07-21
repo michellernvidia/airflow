@@ -32,18 +32,18 @@ pretrain_decision_ = str(pretrain_decision_v)
     
 ## Define DAG + Tasks
 with DAG(
-         "P_TUNING_NEMO_BCP", 
-         schedule_interval='@daily',
+         "LLM_WORKFLOW_NEMO_BCP", 
+         schedule_interval='@once',
          start_date=datetime(2022, 1, 1),
          catchup=False
     ) as dag:
 
-    token_task = PythonOperator(
-            task_id = 'token',
-            python_callable=get_token,
-            op_kwargs={"key": key_, "org": org_ , "team": team_},
-            dag = dag
-    ) 
+#     token_task = PythonOperator(
+#             task_id = 'token',
+#             python_callable=get_token,
+#             op_kwargs={"key": key_, "org": org_ , "team": team_},
+#             dag = dag
+#     ) 
 
     pretrain_decision_task = BranchPythonOperator(
             task_id='get_base_model',
@@ -56,29 +56,29 @@ with DAG(
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
-            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
             dag = dag)
 
     download_the_pile_task = PythonOperator(
             task_id = 'download_pile_dataset',
             python_callable= download_pile_dataset,
-            op_kwargs= {"org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
             dag = dag)
 
     train_gpt_task = PythonOperator(
             task_id = 'train_gpt_model',
             python_callable= train_gpt_model,
-            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
 
     p_tuning_train_task = PythonOperator(
             task_id = 'p_tuning_train',
             python_callable= p_tuning_training_bcp,
-            op_kwargs= {"org":org_, "ace": ace_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
 
-token_task >> pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
+pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> p_tuning_train_task
 download_checkpoint_task >> p_tuning_train_task 
 
