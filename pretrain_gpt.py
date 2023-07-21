@@ -23,8 +23,8 @@ def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
      
      #create workspace to download the pile dataset into
      workspace_name = 'the_pile_dataset_airflow'
-     pile_data_workspace = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
-     workspace_id = pile_data_workspace['id']
+     pile_data_workspace = create_workspace(ti, ngc_api_key, org, ace, workspace_name, team)
+     workspace_id = pile_data_workspace['workspace']['id']
 
      #job parameters
      job_name = "download_the_pile_dataset_airflow"

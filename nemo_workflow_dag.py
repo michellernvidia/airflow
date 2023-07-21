@@ -44,7 +44,7 @@ with DAG(
             python_callable=get_base_model,
             op_kwargs={"pretrain_decision": pretrain_decision_},
             dag=dag)
-    
+        
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,

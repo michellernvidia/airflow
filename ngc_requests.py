@@ -46,6 +46,7 @@ def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
           'name': workspace_name
          }
         response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+        print(f'WORKSPACE RESPONSE: {response}')
         if response.status_code != 200:
             raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
         
