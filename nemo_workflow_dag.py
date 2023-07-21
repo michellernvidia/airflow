@@ -36,14 +36,7 @@ with DAG(
          schedule_interval='@once',
          start_date=datetime(2022, 1, 1),
          catchup=False
-    ) as dag:
-
-#     token_task = PythonOperator(
-#             task_id = 'token',
-#             python_callable=get_token,
-#             op_kwargs={"key": key_, "org": org_ , "team": team_},
-#             dag = dag
-#     ) 
+    ) as dag: 
 
     pretrain_decision_task = BranchPythonOperator(
             task_id='get_base_model',
@@ -52,7 +45,6 @@ with DAG(
             op_kwargs={"pretrain_decision": pretrain_decision_},
             dag=dag)
     
-
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
