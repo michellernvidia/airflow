@@ -7,7 +7,7 @@ def my_task_function():
     # Your task logic goes here
     print("External Triggered Task Executed!")
 
-def my_task_function():
+def my_task_function_2():
     # Your task logic goes here
     print("Checking blah blah blah..........")
 
@@ -33,12 +33,12 @@ start_task = EmptyOperator(task_id='start_task', dag=dag)
 
 external_trigger_task = PythonOperator(
     task_id='external_trigger_task',
-    python_callable=my_task_function,
+    python_callable=my_task_function_2,
     dag=dag,
 )
 
 external_trigger_task_2 = PythonOperator(
-    task_id='external_trigger_task',
+    task_id='external_trigger_task_2',
     python_callable=my_task_function,
     dag=dag,
 )
