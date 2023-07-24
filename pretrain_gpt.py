@@ -89,7 +89,7 @@ def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
             base_results_dir=/mount_workspace/results \
             training.run.time_limit=\"5-00:00:00\" \
             training.trainer.max_time=\"4:23:30:00\" \
-            training.trainer.num_nodes=\${NGC_ARRAY_SIZE} \
+            training.trainer.num_nodes=${NGC_ARRAY_SIZE} \
             training.model.tokenizer.vocab_file=/mount_workspace/data/bpe/vocab.json \
             training.model.tokenizer.merge_file=/mount_workspace/data/bpe/merges.txt \
             > >(tee -a /results/train_log.log) \
