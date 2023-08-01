@@ -69,6 +69,14 @@ with DAG(
             dag = dag)
 
 pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
-download_the_pile_task >> train_gpt_task >> p_tuning_train_task
-download_checkpoint_task >> p_tuning_train_task 
+download_the_pile_task >> train_gpt_task >> tuning_decision_task
+download_checkpoint_task >> tuning_decision_task
+
+tuning_decision_task >> p_tuning_train_task
+tuning_decision_task >> sft_train_task 
+tuning_decision_task >> lora_train_task
+
+tuning_decision_task >> sft_train_task >> p_tuning_train_task
+tuning_decision_task >> sft_train_task >> rlhf_rm_train_task >> rlhf_ppo_task
+
 
