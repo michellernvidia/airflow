@@ -30,46 +30,64 @@ def get_token(ngc_api_key, org=None, team=None):
 
 
 def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
-        
-        token = get_token(ngc_api_key, org)
-        
-        '''Create a workspace in a given org for the authenticated user'''
-        url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {token}'
-         }
-        
-        # nemo_ckpt_.split('.')[0] + 
-        data = {
-          'aceName': f'{ace}',
-          'name': workspace_name
-         }
-        response = requests.request("POST", url, headers=headers, data=json.dumps(data))
-        print(f'WORKSPACE RESPONSE: {response}')
-        if response.status_code != 200:
-            raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
-        
-        return response.json()
+    '''Create a workspace in a given org for the authenticated user'''
+    
+    token = get_token(ngc_api_key, org)
+    
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}'
+        }
+    
+    # nemo_ckpt_.split('.')[0] + 
+    data = {
+        'aceName': f'{ace}',
+        'name': workspace_name
+        }
+    response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+    print(f'WORKSPACE RESPONSE: {response}')
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    
+    return response.json()
+
+
+def get_workspace_contents(ti, ngc_api_key, org, ace, workspace_id):
+    '''Get the files in a workspace's directory from NGC'''
+    token = get_token(ngc_api_key, org)
+
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_id}/listFiles/**'
+    headers = {'Content-Type': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    response = requests.request("GET", url, headers=headers)
+    
+    print(f'WORKSPACE RESPONSE: {response}')
+
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    
+    return response.json()
 
 
 # NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
 def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
                     workspace_mount_path, workspace_id, job_command, team=None, \
                     multinode=False, array_type=None, total_runtime=None):
-      '''Creates an NGC job request via API'''
+    '''Creates an NGC job request via API'''
       
-      token = get_token(ngc_api_key, org, team)
+    token = get_token(ngc_api_key, org, team)
       
-      if team:
+    if team:
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/team/{team}/jobs/'
-      else:
+    else:
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
-      headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
 
-      if multinode:
-          data = {
+    if multinode:
+        data = {
                     "name": job_name,
                     "aceInstance": ace_instance,
                     "aceName": ace_name,
@@ -97,8 +115,8 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "totalRuntime": total_runtime
                 }
           
-      else:
-          data = {
+    else: 
+        data = {
                     "name": job_name,
                     "aceInstance": ace_instance,
                     "aceName": ace_name,
@@ -124,10 +142,10 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "command": job_command
                 }
     
-      response = requests.request("POST", url, headers=headers, data=json.dumps(data))
-      if response.status_code != 200:
-            raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
-      return response.json()
+    response = requests.request("POST", url, headers=headers, data=json.dumps(data))
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    return response.json()
 
 
 def ngc_job_status(ti, ngc_api_key, org, job_id):

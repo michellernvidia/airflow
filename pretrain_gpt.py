@@ -17,6 +17,10 @@ def get_base_model(ti, pretrain_decision):
         return 'download_nemo_checkpoint'
     else:
         return 'download_pile_dataset'
+    
+
+def download_missing_files():
+    return
 
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
 def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
