@@ -10,6 +10,7 @@ from pendulum import datetime
 
 
 @dag(
+    'empty_branching',
     start_date=datetime(2023, 1, 1),
     catchup=False,
     schedule="@daily"
