@@ -71,6 +71,10 @@ with DAG(
     inference_task = EmptyOperator(
             task_id = 'inference_on_squad',
             dag = dag)
+    
+    rlhf_inference_task = EmptyOperator(
+            task_id = 'supported_rlhf_inference',
+            dag = dag)
 
 pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> tuning_decision_task
@@ -81,6 +85,6 @@ tuning_decision_task >> download_squad_task >> sft_train_task >> inference_task
 tuning_decision_task >> download_squad_task >> lora_train_task >> inference_task
 
 tuning_decision_task >> download_squad_task >> sft_train_task >> p_tuning_train_task >> inference_task
-tuning_decision_task >> download_squad_task >> sft_train_task >> rlhf_rm_train_task >> rlhf_ppo_task >> inference_task
+tuning_decision_task >> download_squad_task >> sft_train_task >> rlhf_rm_train_task >> rlhf_ppo_task >> rlhf_inference_task
 
 
