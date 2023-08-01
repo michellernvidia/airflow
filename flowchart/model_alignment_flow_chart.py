@@ -37,6 +37,10 @@ with DAG(
     download_squad_task = EmptyOperator(
             task_id = 'download_squad_dataset',
             dag = dag)
+    
+    download_anthropic_hh_task = EmptyOperator(
+            task_id = 'download_anthropic_hh_dataset',
+            dag = dag)
 
     train_gpt_task = EmptyOperator(
             task_id = 'train_gpt_model',
@@ -85,6 +89,6 @@ tuning_decision_task >> download_squad_task >> sft_train_task >> inference_task
 tuning_decision_task >> download_squad_task >> lora_train_task >> inference_task
 
 tuning_decision_task >> download_squad_task >> sft_train_task >> p_tuning_train_task >> inference_task
-tuning_decision_task >> download_squad_task >> sft_train_task >> rlhf_rm_train_task >> rlhf_ppo_task >> rlhf_inference_task
+tuning_decision_task >> download_squad_task >> sft_train_task >> download_anthropic_hh_task >> rlhf_rm_train_task >> rlhf_ppo_task >> rlhf_inference_task
 
 
