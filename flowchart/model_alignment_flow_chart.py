@@ -1,11 +1,16 @@
 from datetime import datetime, timedelta
 from airflow.models import DAG
 from airflow.operators.empty import EmptyOperator
-from airflow.decorators import dag, task
-from airflow.utils.edgemodifier import Label
+# from airflow.decorators import dag, task
+# from airflow.utils.edgemodifier import Label
+from airflow.operators.python import BranchPythonOperator
 
 
-start_main_dag = EmptyOperator(task_id='start_main_dag', dag=dag)
+def get_base_model():
+    return
+
+def choose_fine_tuning_method():
+    return
     
 ## Define DAG + Tasks
 with DAG(
@@ -19,7 +24,6 @@ with DAG(
             task_id='get_base_model',
             provide_context=True,
             python_callable=get_base_model,
-            op_kwargs={"pretrain_decision": pretrain_decision_},
             dag=dag)
         
     download_checkpoint_task = EmptyOperator(
@@ -38,6 +42,12 @@ with DAG(
             task_id = 'train_gpt_model',
             dag = dag)
 
+    tuning_decision_task = BranchPythonOperator(
+            task_id='tune_base_model',
+            provide_context=True,
+            python_callable=choose_fine_tuning_method,
+            dag=dag)
+    
     p_tuning_train_task = EmptyOperator(
             task_id = 'p_tuning_train',
             dag = dag)
