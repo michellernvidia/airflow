@@ -4,7 +4,7 @@ from ngc_requests import *
 def create_task_workspace(ti, ngc_api_key, org, ace, workspace_name):
     #check if workspace exists already
     print('checking if wksp exists...')
-    workspace_response=get_existing_workspace(ti, ngc_api_key, org, ace, workspace_name)
+    workspace_response=get_existing_workspace(ti, ngc_api_key, org, workspace_name)
     
     #if not, create new one
     if workspace_response["requestStatus"]["statusCode"] == 404:

@@ -52,7 +52,7 @@ def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
     
     return response.json()
 
-def get_existing_workspace(ti, ngc_api_key, org, ace, workspace_id):
+def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
     token = get_token(ngc_api_key, org)
 
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_name}'
