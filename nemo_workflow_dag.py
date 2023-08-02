@@ -86,6 +86,7 @@ with DAG(
             task_id = 'download_squad_dataset',
             python_callable=get_squad_dataset,
             op_kwargs={"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "tuning_method": tuning_method_},
+            trigger_rule=TriggerRule.ONE_SUCCESS, 
             dag=dag
     )
 
