@@ -20,6 +20,14 @@ with DAG(
          catchup=False
     ) as dag: 
 
+    create_gpt_wksp_task = EmptyOperator(
+            task_id = 'create_gpt_workspace',
+            dag = dag)
+    
+    create_tuning_wksp_task = EmptyOperator(
+            task_id = 'create_tuning_workspace',
+            dag = dag)
+    
     pretrain_decision_task = BranchPythonOperator(
             task_id='get_base_model',
             provide_context=True,
@@ -79,6 +87,9 @@ with DAG(
     rlhf_inference_task = EmptyOperator(
             task_id = 'supported_rlhf_inference',
             dag = dag)
+
+create_gpt_wksp_task >> pretrain_decision_task
+create_tuning_wksp_task >> pretrain_decision_task
 
 pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> tuning_decision_task
