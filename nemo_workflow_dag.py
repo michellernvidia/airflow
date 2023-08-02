@@ -19,7 +19,7 @@ key_v = Variable.get("key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
 team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
-workspace_name_v = Variable.get("workspace_name_v", deserialize_json=True)
+# workspace_name_v = Variable.get("workspace_name_v", deserialize_json=True)
 nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
 pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 tuning_method_v = Variable.get("tuning_method_v", deserialize_json=True)
@@ -28,7 +28,7 @@ key_= str(key_v)
 org_=str(org_v)
 team_= str(team_v)
 ace_=str(ace_v)
-workspace_name_ = str(workspace_name_v)
+# workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
@@ -69,10 +69,11 @@ with DAG(
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
 
+    # op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
     download_the_pile_task = PythonOperator(
             task_id = 'download_pile_dataset',
             python_callable= download_pile_dataset,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
 
     train_gpt_task = PythonOperator(
