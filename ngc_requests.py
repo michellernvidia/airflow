@@ -52,6 +52,19 @@ def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
     
     return response.json()
 
+def get_existing_workspace(ti, ngc_api_key, org, ace, workspace_id):
+    token = get_token(ngc_api_key, org)
+
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_name}'
+    headers = {'Content-Type': 'application/json',
+               'Authorization': f'Bearer {token}'}
+
+    response = requests.request("GET", url, headers=headers)
+    print(f'WORKSPACE RESPONSE: {response.json()}')
+    #ok if status code is 404 bc we use it later on to decide if we should create a new wksp
+    if response.status_code != 200 and response.status_code != 404:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    return response.json()
 
 def get_workspace_contents(ti, ngc_api_key, org, ace, workspace_id):
     '''Get the files in a workspace's directory from NGC'''

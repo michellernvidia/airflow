@@ -46,13 +46,13 @@ with DAG(
 
     create_gpt_workspace_task = PythonOperator(
             task_id = 'create_gpt_workspace',
-            python_callable= create_gpt_workspace,
+            python_callable= create_task_workspace,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": gpt_workspace_name},
             dag = dag)
     
     create_tuning_workspace_task = PythonOperator(
             task_id = 'create_tuning_workspace',
-            python_callable= create_tuning_workspace,
+            python_callable= create_task_workspace,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": tuning_workspace_name},
             dag = dag)
     
