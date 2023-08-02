@@ -93,10 +93,12 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
     #workspaces=[{'id': ..., 'mount': ...}] #a list of dicts dedicated one per wksp
     workspaceMountsList = []
     for workspace in workspaces:
-        wksp_mount = {"containerMountPoints": workspace['mount'],
+        mount_point = {"containerMountPoints": workspace['mount'],
                       "id": workspace['id'],
                       "mountMode": "RW"}
-        workspaceMountsList.append(wksp_mount)
+        workspaceMountsList.append(mount_point)
+    
+    print('Workspace mounts//airflow: ', workspaceMountsList)
 
     if multinode:
         data = {

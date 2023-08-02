@@ -42,7 +42,7 @@ def preprocess(ti, ngc_api_key, org, ace, team, tuning_method):
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.05-py3"
     replica_count = 1
-    workspace_mount_path = "/mount/tuning_workspace"
+    workspaces=[{'id': workspace_id, 'mount': '/mount/tuning_workspace'}]
     
     
     if tuning_method.lower() in ['sft', 'lora']:
@@ -54,7 +54,7 @@ def preprocess(ti, ngc_api_key, org, ace, team, tuning_method):
     
     #send ngc job request
     job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
-                                    replica_count, workspace_mount_path, workspace_id, job_command, team=team)
+                                    replica_count, workspaces, job_command, team=team)
 
     #wait for job to complete on BCP before allowing airflow to "finish" task
     final_job_status = wait_for_job_completion(ti,
