@@ -34,7 +34,7 @@ pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
 
 gpt_workspace_name = "airflow_gpt_workspace"
-tuning_workspace_name = f"airflow_{tuning_method_}_workspace"
+tuning_workspace_name = "airflow_tuning_workspace" #f"airflow_{tuning_method_}_workspace"
     
 ## Define DAG + Tasks
 with DAG(
