@@ -72,8 +72,11 @@ def get_workspace_contents(ti, ngc_api_key, org, ace, workspace_id):
 
 
 # NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
+# def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
+#                     workspace_mount_path, workspace_id, job_command, team=None, \
+#                     multinode=False, array_type=None, total_runtime=None):
 def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
-                    workspace_mount_path, workspace_id, job_command, team=None, \
+                    workspaces, job_command, team=None, \
                     multinode=False, array_type=None, total_runtime=None):
     '''Creates an NGC job request via API'''
       
@@ -85,6 +88,15 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
         url = f'https://api.ngc.nvidia.com/v2/org/{org}/jobs/'
 
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+
+
+    #workspaces=[{'id': ..., 'mount': ...}] #a list of dicts dedicated one per wksp
+    workspaceMountsList = []
+    for workspace in workspaces:
+        wksp_mount = {"containerMountPoints": workspace['mount'],
+                      "id": workspace['id'],
+                      "mountMode": "RW"}
+        workspaceMountsList.append(wksp_mount)
 
     if multinode:
         data = {
@@ -103,13 +115,7 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "systemLabels": [],
                     "userLabels": [],
                     "userSecretsSpec": [],
-                    "workspaceMounts": [
-                        {
-                            "containerMountPoint": workspace_mount_path,
-                            "id": workspace_id,
-                            "mountMode": "RW"
-                        }
-                    ],
+                    "workspaceMounts": workspaceMountsList,
                     "command": job_command,
                     "arrayType": array_type,
                     "totalRuntime": total_runtime
@@ -132,13 +138,7 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "systemLabels": [],
                     "userLabels": [],
                     "userSecretsSpec": [],
-                    "workspaceMounts": [
-                        {
-                            "containerMountPoint": workspace_mount_path,
-                            "id": workspace_id,
-                            "mountMode": "RW"
-                        }
-                    ],
+                    "workspaceMounts": workspaceMountsList,
                     "command": job_command
                 }
     

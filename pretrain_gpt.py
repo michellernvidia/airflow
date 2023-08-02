@@ -38,10 +38,10 @@ def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
      ace_name = ace
      docker_image = f"{org}/nemofw-training:23.05-py3" 
      replica_count = 4 #number of nodes
-     workspace_mount_path = "/mount_workspace"
      total_runtime = "10h"
      array_type = "PYTORCH"
      multinode=True
+     workspaces=[{'id': workspace_id, 'mount': '/mount_workspace'}]
      job_command = "\
                     set -x && \
                     mkdir -p /mount_workspace/data/bpe && \
@@ -61,7 +61,7 @@ def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
                     data_preparation.tokenizer_type=GPT2BPETokenizer"
      
      job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
-                    workspace_mount_path, workspace_id, job_command, team, multinode, array_type, total_runtime)
+                    workspaces, job_command, team, multinode, array_type, total_runtime)
      
      #get a job status update from ngc every hour
      final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=3600, team=team)
@@ -80,10 +80,10 @@ def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
      ace_name=ace
      docker_image=f"{org}/nemofw-training:23.05-py3"
      replica_count=4 #number of nodes to run job on
-     workspace_mount_path="/mount_workspace"
      multinode=True
      array_type="PYTORCH"
      total_runtime="5D"
+     workspaces=[{'id': workspace_id, 'mount': '/mount_workspace'}]
      job_command="\
             set -x && \
             python3 /opt/NeMo-Megatron-Launcher/launcher_scripts/main.py \
@@ -104,7 +104,7 @@ def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
             rsync -P -rvh /mount_workspace/results /results"
      
      job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
-                    workspace_mount_path, workspace_id, job_command, team, multinode, array_type, total_runtime)
+                    workspaces, job_command, team, multinode, array_type, total_runtime)
      #get a job status update from ngc twice a day
      #NOTE: we should probably make this an external dag because of the risk of leaving the dag hanging
      #for too long while we wait for the last status update

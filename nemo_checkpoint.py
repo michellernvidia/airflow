@@ -20,13 +20,13 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, team=None):
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.05-py3"
       replica_count = 1
-      workspace_mount_path = "/mount/data"
+      workspaces=[{'id': workspace_id, 'mount': "/mount/data"}]
       job_command = "cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
       
       #send ngc job request
       job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
-                                     replica_count, workspace_mount_path, workspace_id, job_command, team=team)
+                                     replica_count, workspaces, job_command, team=team)
       
       #wait for job to complete on BCP before allowing airflow to "finish" task
       final_job_status = wait_for_job_completion(ti,
