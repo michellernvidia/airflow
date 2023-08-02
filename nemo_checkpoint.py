@@ -4,11 +4,15 @@ from ngc_requests import *
 '''Python file containing functions relevant to the path where we 
 load in a nemo checkpoint and validate its successful download'''
 
-def download_nemo_checkpoint(ti, ngc_api_key, org, ace, workspace_name, team=None):
-      
+# def download_nemo_checkpoint(ti, ngc_api_key, org, ace, workspace_name, team=None):
       #get workspace id
-      workspace_response = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
-      workspace_id = workspace_response['workspace']['id']
+      # workspace_response = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
+      # workspace_id = workspace_response['workspace']['id']
+
+def download_nemo_checkpoint(ti, ngc_api_key, org, ace, team=None):
+
+      #get workspace id
+      workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       
       #ngc job parameters
       job_name = "airflow_download_gpt3_5b_ckpt"

@@ -26,9 +26,11 @@ def download_missing_files():
 def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
      
      #create workspace to download the pile dataset into
-     workspace_name = 'the_pile_dataset_airflow'
-     pile_data_workspace = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
-     workspace_id = pile_data_workspace['workspace']['id']
+    #  workspace_name = 'the_pile_dataset_airflow'
+    #  pile_data_workspace = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
+    #  workspace_id = pile_data_workspace['workspace']['id']
+
+     workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
 
      #job parameters
      job_name = "download_the_pile_dataset_airflow"
@@ -70,7 +72,8 @@ def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
 def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
      
      #get the pile dataset workspace info
-     _, workspace_id = ti.xcom_pull(task_ids='download_pile_dataset')
+    #  _, workspace_id = ti.xcom_pull(task_ids='download_pile_dataset')
+     workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
 
      job_name="airflow-gpt3-training-5b-bf16"
      ace_instance="dgxa100.80g.8.norm"

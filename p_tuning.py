@@ -3,9 +3,14 @@ from ngc_requests import *
 
     
 def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
+
+      #TODO: NEED TO MODIFY NGC_JOB_REQUESTS TO ACCEPT MOUNTING MORE THAN 1 WORKSPACE
       
       #get workspace id
-      _, workspace_id = ti.xcom_pull(task_ids='download_nemo_checkpoint')
+      # _, workspace_id = ti.xcom_pull(task_ids='download_nemo_checkpoint')
+      # gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
+      # tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
+
       
       #ngc job parameters
       job_name = "p_tuning_train_gpt5b_airflow"
