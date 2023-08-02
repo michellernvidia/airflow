@@ -93,7 +93,7 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
     #workspaces=[{'id': ..., 'mount': ...}] #a list of dicts dedicated one per wksp
     workspaceMountsList = []
     for workspace in workspaces:
-        mount_point = {"containerMountPoints": workspace['mount'],
+        mount_point = {"containerMountPoint": workspace['mount'],
                       "id": workspace['id'],
                       "mountMode": "RW"}
         workspaceMountsList.append(mount_point)
