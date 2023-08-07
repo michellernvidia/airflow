@@ -8,7 +8,8 @@ def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       pretrain_decision=ti.xcom_pull(task_ids='get_base_model')
-      if pretrain_decision=='download_nemo_ckpt':
+
+      if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file
       else:
             raise NotImplementedError('Need to retrieve name of checkpoint from pretraining GPT step.') #TO DO
