@@ -2,6 +2,7 @@ import time
 from ngc_requests import *
 
 def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
+      return
       
       #get workspace id
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
@@ -80,7 +81,7 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
             raise NotImplementedError('Need to retrieve name of checkpoint from pretraining GPT step.') #TO DO
 
       #ngc job parameters
-      job_name = "lora_train_airflow"
+      job_name = "lora_inference_airflow"
       ace_instance = "dgxa100.80g.2.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.05-py3"
@@ -92,6 +93,7 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       job_command = f"python3 /opt/NeMo/examples/nlp/language_modeling/tuning/megatron_gpt_peft_eval.py \
                     model.restore_from_path=/mount/gpt_workspace/gpt_models/{gpt_base_model_name} \
                     model.peft.restore_from_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
+                    model.tensor_model_parallel_size=2 \
                     model.data.test_ds.file_names=[/mount/tuning_workspace/SQuAD/v1.1/squad_test.jsonl] \
                     model.data.test_ds.names=['my_test_set'] \
                     model.data.test_ds.global_batch_size=1 \
