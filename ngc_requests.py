@@ -66,7 +66,7 @@ def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     return response.json()
 
-def get_workspace_contents(ti, ngc_api_key, org, ace, workspace_id):
+def get_workspace_contents(ngc_api_key, org, workspace_id):
     '''Get the files in a workspace's directory from NGC'''
     token = get_token(ngc_api_key, org)
 
