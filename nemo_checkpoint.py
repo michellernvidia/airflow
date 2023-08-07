@@ -16,9 +16,12 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=Non
       workspace_id = 'brnsPKXGTBe9ssspdRGufw'
 
       #check if file exists
-      files=get_workspace_contents(ngc_api_key, org, workspace_id)
-      print('WORKSPACE CONTENTS')
-      print(files)
+      response=get_workspace_contents(ngc_api_key, org, workspace_id)
+      print('WORKSPACE CONTENTS', response)
+      contents=response['storageObjects']
+      
+      # for content_dict in contents:
+
       return
       
       # #ngc job parameters
