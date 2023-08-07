@@ -103,6 +103,12 @@ with DAG(
             python_callable= lora_training_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
+    
+    lora_inference_task = PythonOperator(
+            task_id = 'LoRA_inference',
+            python_callable= lora_inference_bcp,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            dag = dag)
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -112,5 +118,5 @@ pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
 
-download_squad_task >> lora_train_task
+download_squad_task >> lora_train_task >> lora_inference_task
 
