@@ -13,6 +13,7 @@ from nemo_checkpoint import *
 from pretrain_gpt import *
 from download_squad import get_squad_dataset
 from p_tuning import *
+from lora import *
 
 ## 0. Variables
 key_v = Variable.get("key_v", deserialize_json=True)
@@ -66,7 +67,7 @@ with DAG(
     download_checkpoint_task = PythonOperator(
             task_id = 'download_nemo_checkpoint',
             python_callable= download_nemo_checkpoint,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "nemo_ckpt_file": nemo_ckpt_, "team": team_},
             dag = dag)
 
     # op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
@@ -97,6 +98,12 @@ with DAG(
 #             trigger_rule=TriggerRule.ONE_SUCCESS,
 #             dag = dag)
 
+    lora_train_task = PythonOperator(
+            task_id = 'LoRA_train',
+            python_callable= lora_training_bcp,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            dag = dag)
+
 
 create_gpt_workspace_task >> pretrain_decision_task
 create_tuning_workspace_task >> pretrain_decision_task
@@ -104,4 +111,6 @@ create_tuning_workspace_task >> pretrain_decision_task
 pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
+
+download_squad_task >> lora_train_task
 

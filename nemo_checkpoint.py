@@ -9,20 +9,23 @@ load in a nemo checkpoint and validate its successful download'''
       # workspace_response = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
       # workspace_id = workspace_response['workspace']['id']
 
-def download_nemo_checkpoint(ti, ngc_api_key, org, ace, team=None):
+def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=None):
 
       #get workspace id
       workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       
       #ngc job parameters
-      job_name = "airflow_download_gpt3_5b_ckpt"
+      job_name = "airflow_download_gpt_nemo_ckpt"
       ace_instance = "dgxa100.80g.1.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.05-py3"
       replica_count = 1
       workspaces=[{'id': workspace_id, 'mount': "/mount/data"}]
-      job_command = "cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
-                    wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
+      # job_command = "cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
+      #               wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
+
+      job_command = f"cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
+                    wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/{nemo_ckpt_file}"
       
       #send ngc job request
       job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
@@ -36,6 +39,6 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, team=None):
                                                  wait_time=15, 
                                                  team=team)
 
-      return job_response, workspace_id
+      return job_response, workspace_id, nemo_ckpt_file
 
  

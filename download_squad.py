@@ -48,7 +48,7 @@ def preprocess(ti, ngc_api_key, org, ace, team, tuning_method):
     if tuning_method.lower() in ['sft', 'lora']:
         job_command = "wget --directory-prefix=/mount/tuning_workspace https://raw.githubusercontent.com/NVIDIA/NeMo/main/scripts/dataset_processing/nlp/squad/prompt_learning_squad_preprocessing.py; \
                 python3 /mount/tuning_workspace/prompt_learning_squad_preprocessing.py --sft-format --data-dir /mount/tuning_workspace/SQuAD/v1.1"
-    else:
+    else: #format for p-tuning
         job_command = "wget --directory-prefix=/mount/tuning_workspace https://raw.githubusercontent.com/NVIDIA/NeMo/main/scripts/dataset_processing/nlp/squad/prompt_learning_squad_preprocessing.py; \
                 python3 /mount/tuning_workspace/prompt_learning_squad_preprocessing.py --data-dir /mount/tuning_workspace/SQuAD/v1.1"
     
