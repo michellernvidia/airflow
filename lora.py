@@ -2,7 +2,6 @@ import time
 from ngc_requests import *
 
 def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
-      return
       
       #get workspace id
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
