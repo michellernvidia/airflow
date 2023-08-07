@@ -12,7 +12,8 @@ load in a nemo checkpoint and validate its successful download'''
 def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=None):
 
       #get workspace id
-      workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
+      # workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
+      workspace_id = 'brnsPKXGTBe9ssspdRGufw'
 
       #check if file exists
       files=get_workspace_contents(ngc_api_key, org, workspace_id)
