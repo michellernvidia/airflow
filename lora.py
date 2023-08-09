@@ -90,16 +90,21 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       
       #note: these settings are currently for GPT 5B BF16 TP2
       job_command = f"python3 /opt/NeMo/examples/nlp/language_modeling/tuning/megatron_gpt_peft_eval.py \
+                    trainer.devices=2 \
+                    trainer.precision=16 \
                     model.restore_from_path=/mount/gpt_workspace/gpt_models/{gpt_base_model_name} \
-                    model.peft.restore_from_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
                     model.tensor_model_parallel_size=2 \
+                    model.global_batch_size=4 \
+                    model.micro_batch_size=1 \
+                    model.peft.peft_scheme='lora' \
+                    model.peft.restore_from_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
                     model.data.test_ds.file_names=[/mount/tuning_workspace/SQuAD/v1.1/squad_test.jsonl] \
                     model.data.test_ds.names=['my_test_set'] \
-                    model.data.test_ds.global_batch_size=1 \
+                    model.data.test_ds.global_batch_size=4 \
                     model.data.test_ds.micro_batch_size=1 \
                     model.data.test_ds.tokens_to_generate=30 \
                     inference.greedy=True \
-                    inference.outfile_path=/mount/tuning_workspace/training_info/lora_inference.txt"
+                    inference.outfile_path=/mount/tuning_workspace/training_info/lora_inference_5b.txt"
       
       #send ngc job request
       job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
