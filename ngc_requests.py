@@ -71,10 +71,11 @@ def get_workspace_contents(ti, ngc_api_key, org, workspace_id):
     token = get_token(ngc_api_key, org)
 
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_id}/listFiles'
+    params={'flat-dir': True}
     headers = {'Content-Type': 'application/json',
                'Authorization': f'Bearer {token}'}
 
-    response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers, params=params)
     
     print(f'WORKSPACE RESPONSE: {response.json()}')
 
