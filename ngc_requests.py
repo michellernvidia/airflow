@@ -66,22 +66,22 @@ def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     return response.json()
 
-# def get_workspace_contents(ngc_api_key, org, workspace_id):
-#     '''Get the files in a workspace's directory from NGC'''
-#     token = get_token(ngc_api_key, org)
+def get_workspace_contents(ti, ngc_api_key, org, workspace_id):
+    '''Get the files in a workspace's directory from NGC'''
+    token = get_token(ngc_api_key, org)
 
-#     url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_id}/listFiles'
-#     headers = {'Content-Type': 'application/json',
-#                'Authorization': f'Bearer {token}'}
+    url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_id}/listFiles'
+    headers = {'Content-Type': 'application/json',
+               'Authorization': f'Bearer {token}'}
 
-#     response = requests.request("GET", url, headers=headers)
+    response = requests.request("GET", url, headers=headers)
     
-#     print(f'WORKSPACE RESPONSE: {response}')
+    print(f'WORKSPACE RESPONSE: {response.json()}')
 
-#     if response.status_code != 200:
-#         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
+    if response.status_code != 200:
+        raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     
-#     return response.json()
+    return response.json()
 
 
 # NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
