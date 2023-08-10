@@ -92,7 +92,7 @@ with DAG(
             dag=dag
     )
 
-    choose_tuning_task = PythonOperator(
+    choose_tuning_task = BranchPythonOperator(
             task_id = 'choose_tuning_method',
             python_callable=choose_tuning_method,
             op_kwargs={"method": tuning_method_},
