@@ -9,6 +9,7 @@ from airflow.utils.trigger_rule import TriggerRule
 
 from ngc_requests import *
 from task_workspace import *
+from branching import *
 from nemo_checkpoint import *
 from pretrain_gpt import *
 from download_squad import get_squad_dataset
@@ -91,12 +92,18 @@ with DAG(
             dag=dag
     )
 
-#     p_tuning_train_task = PythonOperator(
-#             task_id = 'p_tuning_train',
-#             python_callable= p_tuning_training_bcp,
-#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-#             trigger_rule=TriggerRule.ONE_SUCCESS,
-#             dag = dag)
+    choose_tuning_task = PythonOperator(
+            task_id = 'choose_tuning_method',
+            python_callable=choose_tuning_method,
+            op_kwargs={"method": tuning_method_},
+            dag=dag
+    )
+
+    p_tuning_train_task = PythonOperator(
+            task_id = 'p_tuning_train',
+            python_callable= p_tuning_training_bcp,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            dag = dag)
 
     lora_train_task = PythonOperator(
             task_id = 'LoRA_train',
@@ -118,5 +125,6 @@ pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
 
-download_squad_task >> lora_train_task >> lora_inference_task
+download_squad_task >> choose_tuning_method >> lora_train_task >> lora_inference_task
+download_squad_task >> choose_tuning_method >> p_tuning_train_task
 

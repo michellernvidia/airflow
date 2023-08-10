@@ -10,13 +10,6 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.models import Variable
 
 from ngc_requests import create_workspace, ngc_job_request, wait_for_job_completion
-
-
-def get_base_model(ti, pretrain_decision):
-    if pretrain_decision == "False":
-        return 'download_nemo_checkpoint'
-    else:
-        return 'download_pile_dataset'
     
 
 def download_missing_files():
