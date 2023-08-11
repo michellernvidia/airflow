@@ -2,10 +2,7 @@ import time
 from ngc_requests import *
 
 
-def download(ti, ngc_api_key, org, ace, team):
-
-    #get workspace id
-    workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
+def download(ti, ngc_api_key, org, ace, team, workspace_id):
     
     #ngc job parameters
     job_name = "download_squad_dataset"
@@ -31,10 +28,7 @@ def download(ti, ngc_api_key, org, ace, team):
 
     return job_response
 
-def preprocess(ti, ngc_api_key, org, ace, team, tuning_method):
-
-    #get workspace id
-    workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
+def preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method):
 
     #ngc job parameters
     job_name = "squad_data_preprocessing"
@@ -67,7 +61,23 @@ def preprocess(ti, ngc_api_key, org, ace, team, tuning_method):
     return job_response
 
 def get_squad_dataset(ti, ngc_api_key, org, ace, team, tuning_method):
-    download_job_response = download(ti, ngc_api_key, org, ace, team)
-    preprocess_job_response = preprocess(ti, ngc_api_key, org, ace, team, tuning_method)
+
+    #get NGC workspace id where we plan to download squad into
+    workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
+
+    #check if squad files exist in workspace
+    squad_files=['squad_train.jsonl', 'squad_val.jsonl', 'squad_test.jsonl', 'squad_test_ground_truth.jsonl']
+    num_existing_squad_files=0
+    for file in squad_files:
+        file_exists=find_file_in_workspace(ngc_api_key, org, workspace_id, file)
+        num_existing_squad_files+=int(file_exists)
+    
+    #all 4 files already exist
+    if num_existing_squad_files==4:
+        return
+    
+    #dataset does not exist - download and preprocess squad
+    download_job_response = download(ti, ngc_api_key, org, ace, team, workspace_id)
+    preprocess_job_response = preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method)
     return
                       

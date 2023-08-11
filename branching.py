@@ -1,4 +1,4 @@
-
+'''File with branching functions for NeMo Airflow DAG'''
 
 def get_base_model(ti, pretrain_decision):
     if pretrain_decision == "False":

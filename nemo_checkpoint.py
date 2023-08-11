@@ -4,21 +4,15 @@ from ngc_requests import *
 '''Python file containing functions relevant to the path where we 
 load in a nemo checkpoint and validate its successful download'''
 
-# def download_nemo_checkpoint(ti, ngc_api_key, org, ace, workspace_name, team=None):
-      #get workspace id
-      # workspace_response = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
-      # workspace_id = workspace_response['workspace']['id']
-
 def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=None):
 
       #get workspace id
       workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
 
-      # #check if file exists
-      # response=get_workspace_contents(ngc_api_key, org, workspace_id)
-      # print('WORKSPACE CONTENTS', response)
-      # contents=response['storageObjects']
-      # for content_dict in contents:
+      # check if .nemo file already exists in ngc wksp to avoid redownloading
+      checkpoint_exists=find_file_in_workspace(ngc_api_key, org, workspace_id, nemo_ckpt_file)
+      if checkpoint_exists==True:
+            return None, workspace_id, nemo_ckpt_file
       
       #ngc job parameters
       job_name = "airflow_download_gpt_nemo_ckpt"
@@ -27,8 +21,6 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=Non
       docker_image = f"{org}/nemofw-training:23.05-py3"
       replica_count = 1
       workspaces=[{'id': workspace_id, 'mount': "/mount/data"}]
-      # job_command = "cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
-      #               wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/nemo_gpt5B_bf16_tp2.nemo"
 
       job_command = f"cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/{nemo_ckpt_file}"

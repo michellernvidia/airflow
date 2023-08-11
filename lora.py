@@ -7,6 +7,11 @@ def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
+      #avoid retraining if job has already ran and we have our LoRA model
+      lora_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_gpt_airflow_tuning.nemo')
+      if lora_model_exists:
+            return
+
       pretrain_decision=ti.xcom_pull(task_ids='get_base_model')
       if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file

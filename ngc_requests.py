@@ -52,6 +52,7 @@ def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
     
     return response.json()
 
+
 def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
     token = get_token(ngc_api_key, org)
 
@@ -66,7 +67,8 @@ def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     return response.json()
 
-def get_workspace_contents(ti, ngc_api_key, org, workspace_id):
+
+def get_workspace_contents(ngc_api_key, org, workspace_id):
     '''Get the files in a workspace's directory from NGC'''
     token = get_token(ngc_api_key, org)
 
@@ -85,10 +87,14 @@ def get_workspace_contents(ti, ngc_api_key, org, workspace_id):
     return response.json()
 
 
-# NEEDS TO BE RE-RUN + TESTED ON AIRFLOW
-# def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
-#                     workspace_mount_path, workspace_id, job_command, team=None, \
-#                     multinode=False, array_type=None, total_runtime=None):
+def find_file_in_workspace(ngc_api_key, org, workspace_id, filename):
+    contents=get_workspace_contents(ngc_api_key, org, workspace_id)['storageObjects']
+    for workspace_item in contents:
+        if workspace_item['name'] == filename:
+            return True #file exists
+    return False #file does not exist
+
+
 def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
                     workspaces, job_command, team=None, \
                     multinode=False, array_type=None, total_runtime=None):
