@@ -23,7 +23,10 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
       ace_instance = "dgxa100.80g.8.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.05-py3"
-      replica_count = 2
+      replica_count = 1
+    #   multinode=True
+    #   array_type="PYTORCH"
+    #   total_runtime=None
       workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                   {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
       
