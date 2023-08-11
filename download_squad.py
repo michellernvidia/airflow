@@ -5,7 +5,7 @@ from ngc_requests import *
 def download(ti, ngc_api_key, org, ace, team, workspace_id):
     
     #ngc job parameters
-    job_name = "download_squad_dataset"
+    job_name = "download_squad_airflow"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.05-py3"
@@ -31,7 +31,7 @@ def download(ti, ngc_api_key, org, ace, team, workspace_id):
 def preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method):
 
     #ngc job parameters
-    job_name = "squad_data_preprocessing"
+    job_name = "preprocess_squad_airflow"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.05-py3"

@@ -41,7 +41,7 @@ tuning_workspace_name = "airflow_tuning_workspace" #f"airflow_{tuning_method_}_w
     
 ## Define DAG + Tasks
 with DAG(
-         "LLM_WORKFLOW_NEMO_BCP", 
+         "SFT_TEMP_DAG_FULL_WORKFLOW", 
          schedule_interval='@once',
          start_date=datetime(2022, 1, 1),
          catchup=False
@@ -141,4 +141,3 @@ download_checkpoint_task >> download_squad_task
 download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
 download_squad_task >> sft_train_task
-
