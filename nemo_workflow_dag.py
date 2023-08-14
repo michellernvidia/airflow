@@ -36,8 +36,19 @@ nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
 
+# tuning_workspace_name = "airflow_tuning_workspace" #f"airflow_{tuning_method_}_workspace"
+def name_tuning_workspace(method):
+    if method =='lora':
+        tuning_workspace_name = 'airflow_lora_workspace'
+    elif method == 'p_tuning':
+        tuning_workspace_name = 'airflow_p_tuning_workspace'
+    elif method == 'sft':
+        tuning_workspace_name = 'airflow_sft_workspace'
+    return tuning_workspace_name
+
 gpt_workspace_name = "airflow_gpt_workspace"
-tuning_workspace_name = "airflow_tuning_workspace" #f"airflow_{tuning_method_}_workspace"
+tuning_workspace_name=name_tuning_workspace(tuning_method_)
+
     
 ## Define DAG + Tasks
 with DAG(
@@ -140,5 +151,5 @@ download_checkpoint_task >> download_squad_task
 
 download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
-# download_squad_task >> sft_train_task
+download_squad_task >> choose_tuning_task >> sft_train_task
 

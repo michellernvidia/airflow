@@ -80,4 +80,3 @@ def get_squad_dataset(ti, ngc_api_key, org, ace, team, tuning_method):
     download_job_response = download(ti, ngc_api_key, org, ace, team, workspace_id)
     preprocess_job_response = preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method)
     return
-                      
