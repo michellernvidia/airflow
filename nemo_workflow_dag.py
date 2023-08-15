@@ -140,6 +140,12 @@ with DAG(
             python_callable= sft_training_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
+    
+    sft_inference_task = PythonOperator(
+            task_id = 'SFT_inference',
+            python_callable= sft_inference_bcp,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            dag = dag)
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -151,5 +157,5 @@ download_checkpoint_task >> download_squad_task
 
 download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
-download_squad_task >> choose_tuning_task >> sft_train_task
+download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
 
