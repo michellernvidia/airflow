@@ -5,7 +5,6 @@ from ngc_requests import *
 def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
 
       #get workspace id
-      # _, workspace_id = ti.xcom_pull(task_ids='download_nemo_checkpoint')
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 

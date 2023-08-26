@@ -8,7 +8,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #avoid retraining if job has already ran and we have our sft model
-      sft_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'megatron_gpt3_squad.nemo')
+      sft_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'gpt3_5b_sft.nemo')
       if sft_model_exists:
             return
 
