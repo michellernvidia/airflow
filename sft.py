@@ -8,7 +8,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #avoid retraining if job has already ran and we have our sft model
-      sft_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'gpt3_5b_sft.nemo')
+      sft_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'megatron_gpt3_squad.nemo')
       if sft_model_exists:
             return
 
@@ -140,7 +140,7 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
                         model.data.test_ds.micro_batch_size=4 \
                         model.data.test_ds.tokens_to_generate=30 \
                         inference.greedy=True \
-                        inference.outfile_path=/mount/tuning_workspace/sft_launcher_results/gpt3_5b_sft/squad/sft_squad_inference_results.jsonl"
+                        inference.outfile_path=/mount/tuning_workspace/sft_launcher_results/gpt3_5b_sft/squad/results/sft_squad_inference_results.jsonl"
 
       
       #send ngc job request
