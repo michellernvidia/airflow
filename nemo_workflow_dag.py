@@ -152,10 +152,10 @@ create_gpt_workspace_task >> pretrain_decision_task
 create_tuning_workspace_task >> pretrain_decision_task
 
 pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
-download_the_pile_task >> train_gpt_task >> download_squad_task
+# download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
 
-download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
-download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
-download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
+# download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
+# download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
+# download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
 
