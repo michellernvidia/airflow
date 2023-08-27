@@ -107,6 +107,11 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
+      #check if we already have SFT inference results in our workspace
+      sft_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'sft_squad_inference_results.jsonl')
+      if sft_inference_results_exist:
+            return
+
       #ngc job parameters
       job_name = "sft_inference_gpt_5b_squad_airflow"
       ace_instance = "dgxa100.80g.8.norm"
