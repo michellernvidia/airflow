@@ -90,11 +90,11 @@ with DAG(
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
 
-    train_gpt_task = PythonOperator(
-            task_id = 'train_gpt_model',
-            python_callable= train_gpt_model,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     train_gpt_task = PythonOperator(
+#             task_id = 'train_gpt_model',
+#             python_callable= train_gpt_model,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
     
 #     download_squad_task = PythonOperator(
 #             task_id = 'download_squad_dataset',
