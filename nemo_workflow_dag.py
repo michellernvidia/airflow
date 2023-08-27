@@ -96,56 +96,56 @@ with DAG(
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
     
-    download_squad_task = PythonOperator(
-            task_id = 'download_squad_dataset',
-            python_callable=get_squad_dataset,
-            op_kwargs={"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "tuning_method": tuning_method_},
-            trigger_rule=TriggerRule.ONE_SUCCESS, 
-            dag=dag
-    )
+#     download_squad_task = PythonOperator(
+#             task_id = 'download_squad_dataset',
+#             python_callable=get_squad_dataset,
+#             op_kwargs={"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "tuning_method": tuning_method_},
+#             trigger_rule=TriggerRule.ONE_SUCCESS, 
+#             dag=dag
+#     )
 
-    choose_tuning_task = BranchPythonOperator(
-            task_id = 'choose_tuning_method',
-            python_callable=choose_tuning_method,
-            op_kwargs={"method": tuning_method_},
-            dag=dag
-    )
+#     choose_tuning_task = BranchPythonOperator(
+#             task_id = 'choose_tuning_method',
+#             python_callable=choose_tuning_method,
+#             op_kwargs={"method": tuning_method_},
+#             dag=dag
+#     )
 
-    p_tuning_train_task = PythonOperator(
-            task_id = 'p_tuning_train',
-            python_callable= p_tuning_training_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     p_tuning_train_task = PythonOperator(
+#             task_id = 'p_tuning_train',
+#             python_callable= p_tuning_training_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
     
-    p_tuning_inference_task = PythonOperator(
-            task_id = 'p_tuning_inference',
-            python_callable= p_tuning_inference_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     p_tuning_inference_task = PythonOperator(
+#             task_id = 'p_tuning_inference',
+#             python_callable= p_tuning_inference_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
 
-    lora_train_task = PythonOperator(
-            task_id = 'LoRA_train',
-            python_callable= lora_training_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     lora_train_task = PythonOperator(
+#             task_id = 'LoRA_train',
+#             python_callable= lora_training_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
     
-    lora_inference_task = PythonOperator(
-            task_id = 'LoRA_inference',
-            python_callable= lora_inference_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     lora_inference_task = PythonOperator(
+#             task_id = 'LoRA_inference',
+#             python_callable= lora_inference_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
     
-    sft_train_task = PythonOperator(
-            task_id = 'SFT_train',
-            python_callable= sft_training_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     sft_train_task = PythonOperator(
+#             task_id = 'SFT_train',
+#             python_callable= sft_training_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
     
-    sft_inference_task = PythonOperator(
-            task_id = 'SFT_inference',
-            python_callable= sft_inference_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+#     sft_inference_task = PythonOperator(
+#             task_id = 'SFT_inference',
+#             python_callable= sft_inference_bcp,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
 
 
 create_gpt_workspace_task >> pretrain_decision_task
