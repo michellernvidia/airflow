@@ -74,16 +74,12 @@ def get_workspace_contents(ngc_api_key, org, workspace_id):
 
     url = f'https://api.ngc.nvidia.com/v2/org/{org}/workspaces/{workspace_id}/listFiles'
     params={'flat-dir': True, 'page-size': 200}
-    print('params: ', params)
     headers = {'Content-Type': 'application/json',
                'Authorization': f'Bearer {token}'}
 
     response = requests.request("GET", url, headers=headers, params=params)
 
-    print('URL: ', response.url)
-    print('Headers: ', response.headers)
     print(f'WORKSPACE RESPONSE: {response.json()}')
-
     if response.status_code != 200:
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     
@@ -92,11 +88,10 @@ def get_workspace_contents(ngc_api_key, org, workspace_id):
 
 def find_file_in_workspace(ngc_api_key, org, workspace_id, filename):
     contents=get_workspace_contents(ngc_api_key, org, workspace_id)['storageObjects']
-    print("Total number of page contents: ", len(contents))
-    print("WORKSPACE CONTENTS: ", contents)
     for workspace_item in contents:
+        print(workspace_item)
         if workspace_item['name'] == filename:
-            print(f"{filename} EXISTS IN WORKSPACE")
+            print(f"{filename} EXISTS IN WORKSPACE-----------------------")
             return True #file exists
     return False #file does not exist
 
