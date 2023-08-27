@@ -40,9 +40,9 @@ def create_workspace(ti, ngc_api_key, org, ace, workspace_name):
         'Authorization': f'Bearer {token}'
         }
     
-    # nemo_ckpt_.split('.')[0] + 
     data = {'aceName': f'{ace}',
             'name': workspace_name}
+    
     response = requests.request("POST", url, headers=headers, data=json.dumps(data))
     print(f'WORKSPACE RESPONSE: {response}')
     if response.status_code != 200:
