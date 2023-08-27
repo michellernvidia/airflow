@@ -88,8 +88,10 @@ def get_workspace_contents(ngc_api_key, org, workspace_id):
 
 def find_file_in_workspace(ngc_api_key, org, workspace_id, filename):
     contents=get_workspace_contents(ngc_api_key, org, workspace_id)['storageObjects']
+    counter=1
     for workspace_item in contents:
-        print(workspace_item)
+        print(counter, workspace_item)
+        counter += 1
         if workspace_item['name'] == filename:
             print(f"{filename} EXISTS IN WORKSPACE-----------------------")
             return True #file exists
