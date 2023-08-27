@@ -79,7 +79,9 @@ def get_workspace_contents(ngc_api_key, org, workspace_id):
                'Authorization': f'Bearer {token}'}
 
     response = requests.request("GET", url, headers=headers, params=params)
-    
+
+    print('URL: ', response.url)
+    print('Headers: ', response.headers)
     print(f'WORKSPACE RESPONSE: {response.json()}')
 
     if response.status_code != 200:
