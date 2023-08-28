@@ -66,8 +66,9 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
     elif method == "sft":
         nemo_file_path="megatron_gpt3_squad.nemo"
 
+    PYTHONPATH="/opt/NeMo-Megatron-Launcher/launcher_scripts:"
     job_command = f"\
-                    bash -c 'export PYTHONPATH=/opt/FasterTransformer:\${PYTHONPATH} && \
+                    bash -c 'export PYTHONPATH=/opt/FasterTransformer:${PYTHONPATH} && \
                     cd /opt && \
                     python3 /opt/FasterTransformer/examples/pytorch/gpt/utils/nemo_ckpt_convert.py \
                         --in-file {nemo_file_path} \
