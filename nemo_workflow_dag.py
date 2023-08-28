@@ -157,6 +157,7 @@ with DAG(
             task_id = 'create_triton_model_repository',
             python_callable= create_triton_model_repository,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+            trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
     
     launch_triton_task = PythonOperator(
