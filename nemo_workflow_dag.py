@@ -7,22 +7,22 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.models import Variable
 from airflow.utils.trigger_rule import TriggerRule
 
-from ngc_requests import *
-from task_workspace import *
-from branching import *
-from nemo_checkpoint import *
-from pretrain_gpt import *
+# from ngc_requests import *
+from task_workspace import create_task_workspace
+from branching import choose_tuning_method, get_base_model
+from nemo_checkpoint import download_nemo_checkpoint
+from pretrain_gpt import download_pile_dataset, train_gpt_model
 from download_squad import get_squad_dataset
-from p_tuning import *
-from lora import *
-from sft import *
+from p_tuning import p_tuning_training_bcp, p_tuning_inference_bcp
+from lora import lora_training_bcp, lora_inference_bcp
+from sft import sft_training_bcp, sft_inference_bcp
+from triton import merge_lora_weights
 
 ## 0. Variables
 key_v = Variable.get("key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
 team_v = Variable.get("team_v", deserialize_json=True)
 ace_v = Variable.get("ace_v", deserialize_json=True)
-# workspace_name_v = Variable.get("workspace_name_v", deserialize_json=True)
 nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
 pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 tuning_method_v = Variable.get("tuning_method_v", deserialize_json=True)
@@ -31,15 +31,13 @@ key_= str(key_v)
 org_=str(org_v)
 team_= str(team_v)
 ace_=str(ace_v)
-# workspace_name_ = str(workspace_name_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
 
-# tuning_workspace_name = "airflow_tuning_workspace" #f"airflow_{tuning_method_}_workspace"
 def name_tuning_workspace(method):
     if method =='lora':
-        tuning_workspace_name = 'airflow_lora_nemo_workspace'
+        tuning_workspace_name = 'airflow_lora_nemo_workspace' 
     elif method == 'p_tuning':
         tuning_workspace_name = 'airflow_ptuning_nemo_workspace'
     elif method == 'sft':
@@ -146,6 +144,12 @@ with DAG(
             python_callable= sft_inference_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
+    
+    lora_merge_weights_task = PythonOperator(
+            task_id = 'Merge_Adapter_Weights',
+            python_callable= merge_lora_weights,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+            dag = dag)
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -159,3 +163,4 @@ download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_t
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
 download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
 
+lora_train_task >> lora_merge_weights_task
