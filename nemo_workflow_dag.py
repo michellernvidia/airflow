@@ -118,7 +118,7 @@ with DAG(
             dag = dag)
     
     p_tuning_inference_task = PythonOperator(
-            task_id = 'p_tuning_inference',
+            task_id = 'p_tuning_inference_script',
             python_callable= p_tuning_inference_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
@@ -130,7 +130,7 @@ with DAG(
             dag = dag)
     
     lora_inference_task = PythonOperator(
-            task_id = 'LoRA_inference',
+            task_id = 'LoRA_inference_script',
             python_callable= lora_inference_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
@@ -142,7 +142,7 @@ with DAG(
             dag = dag)
     
     sft_inference_task = PythonOperator(
-            task_id = 'SFT_inference',
+            task_id = 'SFT_inference_script',
             python_callable= sft_inference_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
@@ -163,6 +163,7 @@ with DAG(
             task_id = 'launch_triton_server',
             python_callable= launch_triton_server,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+            trigger_rule=TriggerRule.ONE_SUCCESS,
             dag = dag)
     
     choose_lora_inference_task = BranchPythonOperator(
@@ -198,13 +199,11 @@ download_squad_task >> choose_tuning_task >> lora_train_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task
 download_squad_task >> choose_tuning_task >> sft_train_task
 
-lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task
+lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
 lora_train_task >> choose_lora_inference_task >> lora_inference_task
 
-p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task
+p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task >> launch_triton_task
 p_tuning_train_task >> choose_ptuning_inference_task >> p_tuning_inference_task
 
-sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task 
+sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task >> launch_triton_task
 sft_train_task  >> choose_sft_inference_task >> sft_inference_task
-
-create_triton_model_repo_task >> launch_triton_task
