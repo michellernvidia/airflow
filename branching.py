@@ -14,19 +14,20 @@ def choose_tuning_method(ti, method):
     elif method == 'sft':
         return 'SFT_train'
     
-def choose_inference_method(ti, interactive, method):
-    if method == 'lora':
-        if interactive:
-            return 'merge_lora_adapter_weights'
-        else:
-            return 'LoRA_inference'
-    elif method == 'sft':
-        if interactive:
-            return ''
-        else:
-            return 'SFT_inference'
-    elif method == 'p_tuning':
-        if interactive:
-            return ''
-        else:
-            return 'p_tuning_inference'
+def choose_inference_lora(ti, interactive):
+    if interactive:
+        return 'merge_lora_adapter_weights'
+    else:
+        return 'LoRA_inference'
+
+def choose_inference_ptuning(ti, interactive):
+    if interactive:
+        return 'create_triton_model_repository'
+    else:
+        return 'p_tuning_inference'
+
+def choose_inference_sft(ti, interactive):
+    if interactive:
+        return 'create_triton_model_repository'
+    else:
+        return 'SFT_inference'

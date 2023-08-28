@@ -9,7 +9,7 @@ from airflow.utils.trigger_rule import TriggerRule
 
 # from ngc_requests import *
 from task_workspace import create_task_workspace
-from branching import choose_tuning_method, get_base_model, choose_inference_method
+from branching import choose_tuning_method, get_base_model, choose_inference_lora, choose_inference_ptuning, choose_inference_sft
 from nemo_checkpoint import download_nemo_checkpoint
 from pretrain_gpt import download_pile_dataset, train_gpt_model
 from download_squad import get_squad_dataset
@@ -152,13 +152,6 @@ with DAG(
             python_callable= merge_lora_weights,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
-    
-    choose_inference_task = BranchPythonOperator(
-            task_id = 'choose_inference_task',
-            python_callable=choose_inference_method,
-            op_kwargs={"interactive": interactive_, "method": tuning_method_},
-            dag=dag
-    )
 
     create_triton_model_repo_task = PythonOperator(
             task_id = 'create_triton_model_repository',
@@ -171,6 +164,27 @@ with DAG(
             python_callable= launch_triton_server,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
             dag = dag)
+    
+    choose_lora_inference_task = BranchPythonOperator(
+            task_id = 'choose_lora_inference_task',
+            python_callable=choose_inference_lora,
+            op_kwargs={"interactive": interactive_},
+            dag=dag
+    )
+
+    choose_ptuning_inference_task = BranchPythonOperator(
+            task_id = 'choose_ptuning_inference_task',
+            python_callable=choose_inference_ptuning,
+            op_kwargs={"interactive": interactive_},
+            dag=dag
+    )
+
+    choose_sft_inference_task = BranchPythonOperator(
+            task_id = 'choose_sft_inference_task',
+            python_callable=choose_inference_sft,
+            op_kwargs={"interactive": interactive_},
+            dag=dag
+    )
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -184,13 +198,13 @@ download_squad_task >> choose_tuning_task >> lora_train_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task
 download_squad_task >> choose_tuning_task >> sft_train_task
 
-lora_train_task >> choose_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task
-lora_train_task >> choose_inference_task >> lora_inference_task
+lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task
+lora_train_task >> choose_lora_inference_task >> lora_inference_task
 
-p_tuning_train_task >> choose_inference_task >> create_triton_model_repo_task
-p_tuning_train_task >> choose_inference_task >> p_tuning_inference_task
+p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task
+p_tuning_train_task >> choose_ptuning_inference_task >> p_tuning_inference_task
 
-sft_train_task  >> choose_inference_task >> create_triton_model_repo_task 
-sft_train_task  >> choose_inference_task >> sft_inference_task
+sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task 
+sft_train_task  >> choose_sft_inference_task >> sft_inference_task
 
 create_triton_model_repo_task >> launch_triton_task
