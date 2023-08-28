@@ -9,7 +9,7 @@ from airflow.utils.trigger_rule import TriggerRule
 
 # from ngc_requests import *
 from task_workspace import create_task_workspace
-from branching import choose_tuning_method, get_base_model
+from branching import choose_tuning_method, get_base_model, choose_inference_method
 from nemo_checkpoint import download_nemo_checkpoint
 from pretrain_gpt import download_pile_dataset, train_gpt_model
 from download_squad import get_squad_dataset
@@ -26,6 +26,7 @@ ace_v = Variable.get("ace_v", deserialize_json=True)
 nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
 pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 tuning_method_v = Variable.get("tuning_method_v", deserialize_json=True)
+interactive_v = Variable.get("interactive_inference_v", deserialize_json=True)
 
 key_= str(key_v)
 org_=str(org_v)
@@ -34,6 +35,7 @@ ace_=str(ace_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
+interactive_ = str(interactive_v)
 
 def name_tuning_workspace(method):
     if method =='lora':
@@ -150,6 +152,13 @@ with DAG(
             python_callable= merge_lora_weights,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
+    
+    choose_inference_task = BranchPythonOperator(
+            task_id = 'choose_inference_task',
+            python_callable=choose_inference_method,
+            op_kwargs={"interactive": interactive_, "method": tuning_method_},
+            dag=dag
+    )
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -159,8 +168,9 @@ pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
 download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
 
-download_squad_task >> choose_tuning_task >> lora_train_task >> lora_inference_task
+download_squad_task >> choose_tuning_task >> lora_train_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
 download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
 
-lora_train_task >> lora_merge_weights_task
+lora_train_task >> choose_inference_task >>lora_merge_weights_task
+lora_train_task >> choose_inference_task >> lora_inference_task

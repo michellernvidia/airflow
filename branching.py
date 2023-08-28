@@ -13,3 +13,20 @@ def choose_tuning_method(ti, method):
         return 'LoRA_train'
     elif method == 'sft':
         return 'SFT_train'
+    
+def choose_inference_method(ti, interactive, method):
+    if method == 'lora':
+        if interactive:
+            return 'Merge_Adapter_Weights'
+        else:
+            return 'LoRA_inference'
+    elif method == 'sft':
+        if interactive:
+            return ''
+        else:
+            return 'SFT_inference'
+    elif method == 'p_tuning':
+        if interactive:
+            return ''
+        else:
+            return 'p_tuning_inference'
