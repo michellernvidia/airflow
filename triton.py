@@ -16,7 +16,7 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
     job_name = f"airflow_lora_merge_weights"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
-    docker_image = f"nvcr.io/{org}/nemofw-training:23.07-py3"
+    docker_image = f"{org}/nemofw-training:23.07-py3"
     replica_count = 1
     workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                 {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
