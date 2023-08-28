@@ -41,7 +41,6 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
 
 
 def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=None):
-    return
     '''Converts .nemo file into faster transformer + creates the model repository necessary to 
     serve the model through Triton inference server'''
     
@@ -60,26 +59,27 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
     
 
     if method=="p_tuning":
-        nemo_file="nemo_gpt5B_bf16_tp2.nemo"
+        nemo_file_path="nemo_gpt5B_bf16_tp2.nemo"
     elif method == "lora":
-        nemo_file="lora_gpt_5B_merged.nemo"
+        nemo_file_path="/mount/tuning_workspace/training_info/checkpoints/lora_gpt_5B_merged.nemo"
+        model_train_name="lora_gpt5B"
     elif method == "sft":
-        nemo_file="megatron_gpt3_squad.nemo"
+        nemo_file_path="megatron_gpt3_squad.nemo"
 
     job_command = f"\
                     bash -c 'export PYTHONPATH=/opt/FasterTransformer:${PYTHONPATH} && \
                     cd /opt && \
                     python3 /opt/FasterTransformer/examples/pytorch/gpt/utils/nemo_ckpt_convert.py \
-                        --in-file /mount/triton_workspace/gpt_models/{nemo_file} \
+                        --in-file {nemo_file_path} \
                         --infer-gpu-num 2 \
-                        --saved-dir /mount/triton_workspace/model_repository/gpt3_5b \
+                        --saved-dir /mount/tuning_workspace/model_repository/{model_train_name} \
                         --weight-data-type fp16 \
                         --load-checkpoints-to-cpu 0 && \
                     python3 /opt/NeMo-Megatron-Launcher/launcher_scripts/nemo_launcher/collections/export_scripts/prepare_triton_model_config.py \
-                        --model-train-name gpt3_5b \
+                        --model-train-name {model_train_name} \
                         --template-path /opt/fastertransformer_backend/all_models/gpt/fastertransformer/config.pbtxt \
-                        --ft-checkpoint /mount/triton_workspace/model_repository/gpt3_5b/2-gpu \
-                        --config-path /mount/triton_workspace/model_repository/gpt3_5b/config.pbtxt \
+                        --ft-checkpoint /mount/tuning_workspace/model_repository/{model_train_name}/2-gpu \
+                        --config-path /mount/tuning_workspace/model_repository/{model_train_name}/config.pbtxt \
                         --max-batch-size 256 \
                         --tensor-model-parallel-size 2 \
                         --pipeline-model-parallel-size 1 \

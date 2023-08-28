@@ -16,7 +16,7 @@ from download_squad import get_squad_dataset
 from p_tuning import p_tuning_training_bcp, p_tuning_inference_bcp
 from lora import lora_training_bcp, lora_inference_bcp
 from sft import sft_training_bcp, sft_inference_bcp
-from triton import merge_lora_weights
+from triton import merge_lora_weights, create_triton_model_repository
 
 ## 0. Variables
 key_v = Variable.get("key_v", deserialize_json=True)
@@ -160,6 +160,12 @@ with DAG(
             dag=dag
     )
 
+    create_triton_model_repo_task = PythonOperator(
+            task_id = 'Create_Triton_Model_Repository',
+            python_callable= create_triton_model_repository,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+            dag = dag)
+
 
 create_gpt_workspace_task >> pretrain_decision_task
 create_tuning_workspace_task >> pretrain_decision_task
@@ -172,5 +178,5 @@ download_squad_task >> choose_tuning_task >> lora_train_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
 download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
 
-lora_train_task >> choose_inference_task >> lora_merge_weights_task
+lora_train_task >> choose_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task
 lora_train_task >> choose_inference_task >> lora_inference_task
