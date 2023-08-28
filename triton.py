@@ -31,35 +31,19 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
                 lora_model_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
                 merged_model_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_5B_merged.nemo"
     
-    #send ngc job request
-    job_response = ngc_job_request(
-        ti,
-        ngc_api_key, 
-        org,
-        job_name,
-        ace_instance,
-        ace_name,
-        docker_image,
-        replica_count,
-        workspaces,
-        job_command,
-        team=team
-    )
+    print('TEAM:', team)
     
-    #wait for job to complete on BCP before allowing airflow to "finish" task
-    final_job_status = wait_for_job_completion(
-        ti, 
-        ngc_api_key, 
-        org, 
-        job_response, 
-        wait_time=15, 
-        team=team
-    )
+    job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
+                                     replica_count, workspaces, job_command, team=team)
 
+    #wait for job to complete on BCP before allowing airflow to "finish" task
+    final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=30, team=team)
+    
     return job_response
 
 
 def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=None):
+    return
     '''Converts .nemo file into faster transformer + creates the model repository necessary to 
     serve the model through Triton inference server'''
     
