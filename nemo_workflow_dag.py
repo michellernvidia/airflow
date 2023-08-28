@@ -148,7 +148,7 @@ with DAG(
             dag = dag)
     
     lora_merge_weights_task = PythonOperator(
-            task_id = 'Merge_Adapter_Weights',
+            task_id = 'merge_adapter_weights',
             python_callable= merge_lora_weights,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
@@ -161,7 +161,7 @@ with DAG(
     )
 
     create_triton_model_repo_task = PythonOperator(
-            task_id = 'Create_Triton_Model_Repository',
+            task_id = 'create_triton_model_repository',
             python_callable= create_triton_model_repository,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
             dag = dag)
