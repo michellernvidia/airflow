@@ -43,7 +43,8 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
         replica_count,
         workspaces,
         job_command,
-        team=team)
+        team=team
+    )
     
     #wait for job to complete on BCP before allowing airflow to "finish" task
     final_job_status = wait_for_job_completion(
@@ -52,7 +53,8 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
         org, 
         job_response, 
         wait_time=15, 
-        team=team)
+        team=team
+    )
 
     return job_response
 
