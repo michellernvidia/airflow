@@ -23,15 +23,13 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
 
     #currently set up to use GPT 5B - will need to generalize
     job_command="python3 /opt/NeMo/scripts/nlp_language_modeling/merge_lora_weights/merge.py \
-                trainer.devices=1 \
+                trainer.devices=2 \
                 trainer.precision=bf16 \
                 tensor_model_parallel_size=2 \
                 pipeline_model_parallel_size=1 \
                 gpt_model_file=/mount/gpt_workspace/gpt_models/nemo_gpt5B_bf16_tp2.nemo \
                 lora_model_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
                 merged_model_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_5B_merged.nemo"
-    
-    print('TEAM:', team)
     
     job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \
                                      replica_count, workspaces, job_command, team=team)
@@ -55,7 +53,7 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
     job_name = f"airflow_triton_inference_{method}"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
-    docker_image = f"nvcr.io/{org}/nemofw-training:23.07-py3"
+    docker_image = f"{org}/nemofw-training:23.07-py3"
     replica_count = 1
     workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                 {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
