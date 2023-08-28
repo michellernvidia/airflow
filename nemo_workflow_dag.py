@@ -148,7 +148,7 @@ with DAG(
             dag = dag)
     
     lora_merge_weights_task = PythonOperator(
-            task_id = 'merge_adapter_weights',
+            task_id = 'merge_lora_adapter_weights',
             python_callable= merge_lora_weights,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)

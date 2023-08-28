@@ -17,7 +17,7 @@ def choose_tuning_method(ti, method):
 def choose_inference_method(ti, interactive, method):
     if method == 'lora':
         if interactive:
-            return 'merge_adapter_weights'
+            return 'merge_lora_adapter_weights'
         else:
             return 'LoRA_inference'
     elif method == 'sft':
