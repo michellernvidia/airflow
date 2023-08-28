@@ -67,7 +67,7 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
         nemo_file_path="megatron_gpt3_squad.nemo"
 
     job_command = f"\
-                    bash -c 'export PYTHONPATH=/opt/FasterTransformer:${PYTHONPATH} && \
+                    bash -c 'export PYTHONPATH=/opt/FasterTransformer:\${PYTHONPATH} && \
                     cd /opt && \
                     python3 /opt/FasterTransformer/examples/pytorch/gpt/utils/nemo_ckpt_convert.py \
                         --in-file {nemo_file_path} \
@@ -83,7 +83,7 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
                         --max-batch-size 256 \
                         --tensor-model-parallel-size 2 \
                         --pipeline-model-parallel-size 1 \
-                        --data-type fp16'"
+                        --data-type fp16' "
     
     #send ngc job request
     job_response = ngc_job_request(
