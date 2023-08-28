@@ -16,7 +16,7 @@ from download_squad import get_squad_dataset
 from p_tuning import p_tuning_training_bcp, p_tuning_inference_bcp
 from lora import lora_training_bcp, lora_inference_bcp
 from sft import sft_training_bcp, sft_inference_bcp
-from triton import merge_lora_weights, create_triton_model_repository
+from triton import merge_lora_weights, create_triton_model_repository, launch_triton_server
 
 ## 0. Variables
 key_v = Variable.get("key_v", deserialize_json=True)
@@ -41,9 +41,9 @@ def name_tuning_workspace(method):
     if method =='lora':
         tuning_workspace_name = 'airflow_lora_nemo_workspace' 
     elif method == 'p_tuning':
-        tuning_workspace_name = 'airflow_ptuning_nemo_workspace'
+        tuning_workspace_name = 'airflow_ptuning_workspace'
     elif method == 'sft':
-        tuning_workspace_name = 'airflow_sft_nemo_workspace'
+        tuning_workspace_name = 'airflow_sft_workspace'
     return tuning_workspace_name
 
 gpt_workspace_name = "airflow_gpt_workspace"
@@ -165,6 +165,12 @@ with DAG(
             python_callable= create_triton_model_repository,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
             dag = dag)
+    
+    launch_triton_task = PythonOperator(
+            task_id = 'launch_triton_server',
+            python_callable= launch_triton_server,
+            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+            dag = dag)
 
 
 create_gpt_workspace_task >> pretrain_decision_task
@@ -175,8 +181,16 @@ download_the_pile_task >> train_gpt_task >> download_squad_task
 download_checkpoint_task >> download_squad_task
 
 download_squad_task >> choose_tuning_task >> lora_train_task
-download_squad_task >> choose_tuning_task>> p_tuning_train_task >> p_tuning_inference_task
-download_squad_task >> choose_tuning_task >> sft_train_task >> sft_inference_task
+download_squad_task >> choose_tuning_task>> p_tuning_train_task
+download_squad_task >> choose_tuning_task >> sft_train_task
 
 lora_train_task >> choose_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task
 lora_train_task >> choose_inference_task >> lora_inference_task
+
+p_tuning_train_task >> choose_inference_task >> create_triton_model_repo_task
+p_tuning_train_task >> choose_inference_task >> p_tuning_inference_task
+
+sft_train_task  >> choose_inference_task >> create_triton_model_repo_task 
+sft_train_task  >> choose_inference_task >> sft_inference_task
+
+create_triton_model_repo_task >> launch_triton_task

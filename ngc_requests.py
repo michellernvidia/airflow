@@ -94,7 +94,7 @@ def find_file_in_workspace(ngc_api_key, org, workspace_id, filename):
 
 def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, replica_count, \
                     workspaces, job_command, team=None, \
-                    multinode=False, array_type=None, total_runtime=None):
+                    multinode=False, array_type=None, total_runtime=None, ports=None):
     '''Creates an NGC job request via API'''
       
     token = get_token(ngc_api_key, org, team)
@@ -107,15 +107,13 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
 
 
-    #workspaces=[{'id': ..., 'mount': ...}] #a list of dicts dedicated one per wksp
-    workspaceMountsList = []
+    #create workspace mounts
+    workspace_mounts_list = []
     for workspace in workspaces:
-        mount_point = {"containerMountPoint": workspace['mount'],
-                      "id": workspace['id'],
-                      "mountMode": "RW"}
-        workspaceMountsList.append(mount_point)
-    
-    print('Workspace mounts//airflow: ', workspaceMountsList)
+        mount_point = {"containerMountPoint": workspace['mount'], "id": workspace['id'], "mountMode": "RW"}
+        workspace_mounts_list.append(mount_point)
+
+    print('Workspace mounts - airflow: ', workspace_mounts_list)
 
     if multinode:
         data = {
@@ -134,10 +132,11 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "systemLabels": [],
                     "userLabels": [],
                     "userSecretsSpec": [],
-                    "workspaceMounts": workspaceMountsList,
+                    "workspaceMounts": workspace_mounts_list,
                     "command": job_command,
                     "arrayType": array_type,
-                    "totalRuntime": total_runtime
+                    "totalRuntime": total_runtime,
+                    "portMappings": ports
                 }
           
     else: 
@@ -157,8 +156,9 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
                     "systemLabels": [],
                     "userLabels": [],
                     "userSecretsSpec": [],
-                    "workspaceMounts": workspaceMountsList,
-                    "command": job_command
+                    "workspaceMounts": workspace_mounts_list,
+                    "command": job_command,
+                    "portMappings": ports
                 }
     
     response = requests.request("POST", url, headers=headers, data=json.dumps(data))
