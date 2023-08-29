@@ -34,18 +34,20 @@ def choose_inference_sft(ti, interactive):
     
 
 def choose_inference(ti, interactive, method):
+    print('method: ', method)
+    print('interactive: ', interactive)
     if method == 'lora':
         if interactive:
-            return 'merge_lora_adapter_weights'
+            return 'triton_inference.merge_lora_adapter_weights'
         else:
             return 'nemo_script_inference.LoRA_inference_script'
     elif method == 'p_tuning':
         if interactive:
-            return 'create_triton_model_repository'
+            return 'triton_inference.create_triton_model_repository'
         else:
             return 'nemo_script_inference.p_tuning_inference_script'
     elif method == 'sft':
         if interactive:
-            return 'create_triton_model_repository'
+            return 'triton_inference.create_triton_model_repository'
         else:
             return 'nemo_script_inference.SFT_inference_script'
