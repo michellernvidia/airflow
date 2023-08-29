@@ -1,8 +1,4 @@
-from airflow.decorators import task_group
-from airflow.operators import EmptyOperator
-
 import datetime
-
 from airflow import DAG
 from airflow.decorators import task_group
 from airflow.operators.bash import BashOperator
