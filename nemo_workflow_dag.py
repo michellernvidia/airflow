@@ -207,9 +207,10 @@ with DAG(
     download_squad_task >> choose_tuning_task>> p_tuning_train_task
     download_squad_task >> choose_tuning_task >> sft_train_task
     
-    lora_train_task >> choose_inference_task >> inference_scripts()
-    p_tuning_train_task >> choose_inference_task >> inference_scripts()
-    sft_train_task >> choose_inference_task >> inference_scripts()
+    lora_train_task >> choose_inference_task
+    p_tuning_train_task >> choose_inference_task
+    sft_train_task >> choose_inference_task 
+    choose_inference_task >> inference_scripts()
 
 # lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
 # lora_train_task >> choose_lora_inference_task >> lora_inference_task
