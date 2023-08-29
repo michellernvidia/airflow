@@ -75,7 +75,7 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #check if we already have SFT inference results in our workspace
-      sft_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'sft_squad_inference_results.jsonl')
+      sft_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'sft_gpt3_5b_inference.jsonl')
       if sft_inference_results_exist:
             return
 
@@ -99,7 +99,7 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
                         model.data.test_ds.micro_batch_size=4 \
                         model.data.test_ds.tokens_to_generate=30 \
                         inference.greedy=True \
-                        inference.outfile_path=/mount/tuning_workspace/sft_launcher_results/gpt3_5b_sft/squad/results/sft_squad_inference_results.jsonl"
+                        inference.outfile_path=/mount/tuning_workspace/sft_launcher_results/gpt3_5b_sft/squad/results/sft_gpt3_5b_inference.jsonl"
 
       
       #send ngc job request

@@ -8,7 +8,7 @@ def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #avoid retraining if job has already ran and we have our LoRA model
-      lora_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_gpt_airflow_tuning.nemo')
+      lora_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_gpt3_5b.nemo')
       if lora_model_exists:
             return
 
@@ -29,7 +29,7 @@ def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
       
       #note: these settings are currently for GPT 5B BF16 TP2
       job_command = f"python3 /opt/NeMo/examples/nlp/language_modeling/tuning/megatron_gpt_peft_tuning.py \
-                    name=lora_gpt_airflow_tuning \
+                    name=lora_gpt3_5b \
                     trainer.devices=2 \
                     trainer.accelerator=gpu \
                     trainer.num_nodes=1 \
@@ -79,7 +79,7 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #avoid rerunning inference if we already have inference results for LoRA
-      lora_inference_txt_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_inference_5b.txt')
+      lora_inference_txt_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_gpt3_5b_inference.txt')
       if lora_inference_txt_exists:
             return
 
@@ -107,14 +107,14 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
                     model.global_batch_size=16 \
                     model.micro_batch_size=4 \
                     model.peft.peft_scheme='lora' \
-                    model.peft.restore_from_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt_airflow_tuning.nemo \
+                    model.peft.restore_from_path=/mount/tuning_workspace/training_info/checkpoints/lora_gpt3_5b.nemo \
                     model.data.test_ds.file_names=[/mount/tuning_workspace/SQuAD/v1.1/squad_test.jsonl] \
                     model.data.test_ds.names=['my_test_set'] \
                     model.data.test_ds.global_batch_size=4 \
                     model.data.test_ds.micro_batch_size=1 \
                     model.data.test_ds.tokens_to_generate=30 \
                     inference.greedy=True \
-                    inference.outfile_path=/mount/tuning_workspace/training_info/lora_inference_5b.txt"
+                    inference.outfile_path=/mount/tuning_workspace/training_info/lora_gpt3_5b_inference.txt"
       
       #send ngc job request
       job_response = ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, docker_image, \

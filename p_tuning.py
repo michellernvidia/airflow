@@ -9,7 +9,7 @@ def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #avoid retraining if job has already ran and we have our p-tuned model
-      p_tuned_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'p_tuned_5b.nemo')
+      p_tuned_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'p_tuned_gpt3_5b.nemo')
       if p_tuned_model_exists:
             return
 
@@ -39,7 +39,7 @@ def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
                             prompt_learning.run.model_train_name=gpt3_5b \
                             prompt_learning.trainer.devices=2 \
                             prompt_learning.model.language_model_path=/mount/gpt_workspace/gpt_models/{gpt_base_model_name} \
-                            prompt_learning.model.nemo_path=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_5b.nemo \
+                            prompt_learning.model.nemo_path=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_gpt3_5b.nemo \
                             prompt_learning.model.tensor_model_parallel_size=2 \
                             >> /results/prompt_learning_gpt3_log.txt 2>&1"
                         #     prompt_learning.model.virtual_prompt_style='p-tuning' \
@@ -67,7 +67,7 @@ def p_tuning_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
       #check if we already have p-tuning inference results in our workspace
-      ptuning_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'p_tuned_5b_inference_results.txt')
+      ptuning_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'p_tuned_gpt3_5b_inference.txt')
       if ptuning_inference_results_exist:
             return
 
@@ -92,9 +92,9 @@ def p_tuning_inference_bcp(ti, ngc_api_key, org, ace, team=None):
                         --config-path=/opt/NeMo/examples/nlp/language_modeling/conf/ \
                         --config-name=megatron_gpt_prompt_learning_inference.yaml \
                         gpt_model_file=/mount/gpt_workspace/gpt_models/{gpt_base_model_name} \
-                        virtual_prompt_model_file=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_5b.nemo \
+                        virtual_prompt_model_file=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_gpt3_5b.nemo \
                         data_paths=['/mount/tuning_workspace/SQuAD/v1.1/squad_test.jsonl'] \
-                        pred_file_path=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_5b_inference_results.txt \
+                        pred_file_path=/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_gpt3_5b_inference.txt \
                         trainer.devices=2 \
                         tensor_model_parallel_size=2 \
                         pipeline_model_parallel_size=1"
