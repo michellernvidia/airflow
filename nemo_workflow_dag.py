@@ -99,15 +99,13 @@ with DAG(
             python_callable=get_squad_dataset,
             op_kwargs={"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "tuning_method": tuning_method_},
             trigger_rule=TriggerRule.ONE_SUCCESS, 
-            dag=dag
-    )
+            dag=dag)
 
     choose_tuning_task = BranchPythonOperator(
             task_id = 'choose_tuning_method',
             python_callable=choose_tuning_method,
             op_kwargs={"method": tuning_method_},
-            dag=dag
-    )
+            dag=dag)
 
     p_tuning_train_task = PythonOperator(
             task_id = 'p_tuning_train',
@@ -154,7 +152,6 @@ with DAG(
                 op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
                 dag = dag)
         
-
     @task_group(group_id='triton_inference')
     def triton_inference():
         lora_merge_weights_task = PythonOperator(
