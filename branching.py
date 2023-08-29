@@ -38,14 +38,14 @@ def choose_inference(ti, interactive, method):
         if interactive:
             return 'merge_lora_adapter_weights'
         else:
-            return 'LoRA_inference_script'
+            return 'inference_scripts.LoRA_inference_script'
     elif method == 'p_tuning':
         if interactive:
             return 'create_triton_model_repository'
         else:
-            return 'p_tuning_inference_script'
+            return 'inference_scripts.p_tuning_inference_script'
     elif method == 'sft':
         if interactive:
             return 'create_triton_model_repository'
         else:
-            return 'SFT_inference_script'
+            return 'inference_scripts.SFT_inference_script'

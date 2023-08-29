@@ -135,7 +135,7 @@ with DAG(
                 trigger_rule=TriggerRule.ONE_SUCCESS,
                 dag=dag)
     
-    @task_group()
+    @task_group(group_id='inference_scripts')
     def inference_scripts():
         p_tuning_inference_task = PythonOperator(
                 task_id = 'p_tuning_inference_script',
