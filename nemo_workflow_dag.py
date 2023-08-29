@@ -33,7 +33,7 @@ ace_=str(ace_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
-interactive_ = str(interactive_v)
+interactive_ = str(interactive_v) == True #convert to bool
 
 # Set-up names for our tuning method's workspace in NGC
 def name_tuning_workspace(method):
