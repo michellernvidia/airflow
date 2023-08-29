@@ -46,7 +46,7 @@ def name_tuning_workspace(method):
     return tuning_workspace_name
 
 tuning_workspace_name=name_tuning_workspace(tuning_method_)
-gpt_workspace_name = "airflow_gpt_workspace"
+gpt_workspace_name = "airflow_gpt_nemo_workspace"
 
 ## Define Airflow DAG and Tasks
 with DAG(
