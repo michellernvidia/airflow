@@ -7,7 +7,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 
 from task_workspace import create_task_workspace
-from branching import choose_tuning_method, get_base_model, choose_inference_lora, choose_inference_ptuning, choose_inference_sft, choose_inference
+from branching import choose_tuning_method, get_base_model, choose_inference
 from nemo_checkpoint import download_nemo_checkpoint
 from pretrain_gpt import download_pile_dataset, train_gpt_model
 from download_squad import get_squad_dataset
