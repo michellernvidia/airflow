@@ -5,7 +5,7 @@ from ngc_requests import *
 def download(ti, ngc_api_key, org, ace, team, workspace_id):
     
     #ngc job parameters
-    job_name = "download_squad_airflow"
+    job_name = "airflow_download_squad"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.07-py3"
@@ -19,25 +19,19 @@ def download(ti, ngc_api_key, org, ace, team, workspace_id):
                                     replica_count, workspaces, job_command, team=team)
 
     #wait for job to complete on BCP before allowing airflow to "finish" task
-    final_job_status = wait_for_job_completion(ti,
-                                                ngc_api_key,
-                                                org, 
-                                                job_response, 
-                                                wait_time=60, 
-                                                team=team)
+    final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=60, team=team)
 
     return job_response
 
 def preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method):
 
     #ngc job parameters
-    job_name = "preprocess_squad_airflow"
+    job_name = "airflow_preprocess_squad"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.07-py3"
     replica_count = 1
     workspaces=[{'id': workspace_id, 'mount': '/mount/tuning_workspace'}]
-    
     
     if tuning_method.lower() in ['sft', 'lora']:
         job_command = "wget --directory-prefix=/mount/tuning_workspace https://raw.githubusercontent.com/NVIDIA/NeMo/main/scripts/dataset_processing/nlp/squad/prompt_learning_squad_preprocessing.py; \
@@ -51,12 +45,7 @@ def preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method):
                                     replica_count, workspaces, job_command, team=team)
 
     #wait for job to complete on BCP before allowing airflow to "finish" task
-    final_job_status = wait_for_job_completion(ti,
-                                                ngc_api_key,
-                                                org, 
-                                                job_response, 
-                                                wait_time=60, 
-                                                team=team)
+    final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=60, team=team)
 
     return job_response
 

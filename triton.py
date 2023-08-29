@@ -13,7 +13,7 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
         return
     
     #ngc job parameters
-    job_name = f"airflow_lora_merge_weights"
+    job_name = f"airflow_lora_gpt3_5b_merge_weights"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
     docker_image = f"{org}/nemofw-training:23.07-py3"

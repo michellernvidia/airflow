@@ -15,7 +15,7 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=Non
             return None, workspace_id, nemo_ckpt_file
       
       #ngc job parameters
-      job_name = "airflow_download_gpt_nemo_ckpt"
+      job_name = "airflow_download_gpt3_5b_nemo_ckpt"
       ace_instance = "dgxa100.80g.1.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.07-py3"

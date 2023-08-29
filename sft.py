@@ -19,7 +19,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
             raise NotImplementedError('Need to retrieve name of checkpoint from pretraining GPT step.') #TO DO
 
       #ngc job parameters
-      job_name = "sft_train_gpt_5b_squad_airflow"
+      job_name = "airflow_sft_gpt3_5b_train"
       ace_instance = "dgxa100.80g.8.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.07-py3"
@@ -79,7 +79,7 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
             return
 
       #ngc job parameters
-      job_name = "sft_inference_gpt_5b_squad_airflow"
+      job_name = "airflow_sft_gpt3_5b_inference"
       ace_instance = "dgxa100.80g.8.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.07-py3"
