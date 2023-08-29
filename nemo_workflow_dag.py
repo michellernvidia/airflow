@@ -40,9 +40,9 @@ def name_tuning_workspace(method):
     if method =='lora':
         tuning_workspace_name = 'airflow_lora_nemo_workspace' 
     elif method == 'p_tuning':
-        tuning_workspace_name = 'airflow_ptuning_workspace'
+        tuning_workspace_name = 'airflow_ptuning_nemo_workspace'
     elif method == 'sft':
-        tuning_workspace_name = 'airflow_sft_workspace'
+        tuning_workspace_name = 'airflow_sft_nemo_workspace'
     return tuning_workspace_name
 
 tuning_workspace_name=name_tuning_workspace(tuning_method_)
