@@ -135,22 +135,22 @@ with DAG(
                 trigger_rule=TriggerRule.ONE_SUCCESS,
                 dag=dag)
     
-    @task_group(group_id='inference_scripts')
+    @task_group(group_id=f'inference_scripts')
     def inference_scripts():
         p_tuning_inference_task = PythonOperator(
-                task_id = 'p_tuning_inference_script',
+                task_id = f'p_tuning_inference_script',
                 python_callable= p_tuning_inference_bcp,
                 op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
                 dag = dag)
         
         lora_inference_task = PythonOperator(
-                task_id = 'LoRA_inference_script',
+                task_id = f'LoRA_inference_script',
                 python_callable= lora_inference_bcp,
                 op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
                 dag = dag)
         
         sft_inference_task = PythonOperator(
-                task_id = 'SFT_inference_script',
+                task_id = f'SFT_inference_script',
                 python_callable= sft_inference_bcp,
                 op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
                 dag = dag)
