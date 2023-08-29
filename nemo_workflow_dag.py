@@ -1,13 +1,11 @@
-import os, json, base64, requests, time
 from datetime import datetime
 from airflow import DAG
-from airflow.decorators import task
+from airflow.models import Variable
+from airflow.decorators import task_group
+from airflow.utils.trigger_rule import TriggerRule
 from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
-from airflow.models import Variable
-from airflow.utils.trigger_rule import TriggerRule
 
-# from ngc_requests import *
 from task_workspace import create_task_workspace
 from branching import choose_tuning_method, get_base_model, choose_inference_lora, choose_inference_ptuning, choose_inference_sft
 from nemo_checkpoint import download_nemo_checkpoint
@@ -18,7 +16,7 @@ from lora import lora_training_bcp, lora_inference_bcp
 from sft import sft_training_bcp, sft_inference_bcp
 from triton import merge_lora_weights, create_triton_model_repository, launch_triton_server
 
-## 0. Variables
+# Get variables from Airflow UI
 key_v = Variable.get("key_v", deserialize_json=True)
 org_v = Variable.get("org_v", deserialize_json=True)
 team_v = Variable.get("team_v", deserialize_json=True)
@@ -37,6 +35,7 @@ pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
 interactive_ = str(interactive_v)
 
+# Set-up names for our tuning method's workspace in NGC
 def name_tuning_workspace(method):
     if method =='lora':
         tuning_workspace_name = 'airflow_lora_nemo_workspace' 
@@ -46,11 +45,11 @@ def name_tuning_workspace(method):
         tuning_workspace_name = 'airflow_sft_workspace'
     return tuning_workspace_name
 
-gpt_workspace_name = "airflow_gpt_workspace"
 tuning_workspace_name=name_tuning_workspace(tuning_method_)
+gpt_workspace_name = "airflow_gpt_workspace"
 
     
-## Define DAG + Tasks
+## Define Airflow DAG and Tasks
 with DAG(
          "LLM_WORKFLOW_NEMO_BCP", 
          schedule_interval='@once',
@@ -168,11 +167,11 @@ with DAG(
             dag = dag)
     
     choose_lora_inference_task = BranchPythonOperator(
-            task_id = 'choose_lora_inference_task',
-            python_callable=choose_inference_lora,
-            op_kwargs={"interactive": interactive_},
-            dag=dag
-    )
+                task_id = 'choose_lora_inference_task',
+                python_callable=choose_inference_lora,
+                op_kwargs={"interactive": interactive_},
+                dag=dag
+        )
 
     choose_ptuning_inference_task = BranchPythonOperator(
             task_id = 'choose_ptuning_inference_task',
@@ -189,6 +188,7 @@ with DAG(
     )
 
 
+# Put together the NeMo LLM workflow steps in order 
 create_gpt_workspace_task >> pretrain_decision_task
 create_tuning_workspace_task >> pretrain_decision_task
 
