@@ -19,4 +19,4 @@ with DAG(
 
     task3 = EmptyOperator(task_id="task3")
 
-group1() >> task3
+    group1() >> task3
