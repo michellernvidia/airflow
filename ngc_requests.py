@@ -107,7 +107,6 @@ def ngc_job_request(ti, ngc_api_key, org, job_name, ace_instance, ace_name, dock
 
     headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
 
-
     #create workspace mounts
     workspace_mounts_list = []
     for workspace in workspaces:

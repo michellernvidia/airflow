@@ -18,11 +18,11 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=Non
       job_name = "airflow_download_gpt_nemo_ckpt"
       ace_instance = "dgxa100.80g.1.norm"
       ace_name = ace
-      docker_image = f"{org}/nemofw-training:23.05-py3"
+      docker_image = f"{org}/nemofw-training:23.07-py3"
       replica_count = 1
-      workspaces=[{'id': workspace_id, 'mount': "/mount/data"}]
+      workspaces=[{'id': workspace_id, 'mount': "/mount/gpt_workspace"}]
 
-      job_command = f"cd ../; cd /mount/data/; mkdir gpt_models; cd gpt_models;\
+      job_command = f"cd ../; cd /mount/gpt_workspace/; mkdir gpt_models; cd gpt_models;\
                     wget https://huggingface.co/nvidia/nemo-megatron-gpt-5B/resolve/main/{nemo_ckpt_file}"
       
       #send ngc job request

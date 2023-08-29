@@ -23,7 +23,7 @@ def p_tuning_training_bcp(ti, ngc_api_key, org, ace, team=None):
       job_name = "p_tuning_train_gpt5b_airflow"
       ace_instance = "dgxa100.80g.4.norm"
       ace_name = ace
-      docker_image = f"{org}/nemofw-training:23.05-py3"
+      docker_image = f"{org}/nemofw-training:23.07-py3"
       replica_count = 1
       workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                   {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
@@ -76,7 +76,7 @@ def p_tuning_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       job_name = "p_tuning_inference_gpt5b_airflow"
       ace_instance = "dgxa100.80g.2.norm"
       ace_name = ace
-      docker_image = f"{org}/nemofw-training:23.05-py3"
+      docker_image = f"{org}/nemofw-training:23.07-py3"
       replica_count = 1
       workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                   {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]

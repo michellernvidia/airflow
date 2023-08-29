@@ -8,7 +8,7 @@ def download(ti, ngc_api_key, org, ace, team, workspace_id):
     job_name = "download_squad_airflow"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
-    docker_image = f"{org}/nemofw-training:23.05-py3"
+    docker_image = f"{org}/nemofw-training:23.07-py3"
     replica_count = 1
     workspaces=[{'id': workspace_id, 'mount': '/mount/tuning_workspace'}]
     job_command ="python3 -c \"from nemo_launcher.utils.data_utils.prepare_squad import prepare_squad_for_fine_tuning; \
@@ -34,7 +34,7 @@ def preprocess(ti, ngc_api_key, org, ace, team, workspace_id, tuning_method):
     job_name = "preprocess_squad_airflow"
     ace_instance = "dgxa100.80g.2.norm"
     ace_name = ace
-    docker_image = f"{org}/nemofw-training:23.05-py3"
+    docker_image = f"{org}/nemofw-training:23.07-py3"
     replica_count = 1
     workspaces=[{'id': workspace_id, 'mount': '/mount/tuning_workspace'}]
     

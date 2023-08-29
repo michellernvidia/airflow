@@ -15,11 +15,3 @@ def create_task_workspace(ti, ngc_api_key, org, ace, workspace_name):
     
     workspace_id = workspace_response['workspace']['id']
     return workspace_id
-
-# def create_gpt_workspace(ti, ngc_api_key, org, ace, workspace_name):
-#     #check if workspace exists already
-
-#     #if not, create new one
-#     workspace_response = create_workspace(ti, ngc_api_key, org, ace, workspace_name)
-#     workspace_id = workspace_response['workspace']['id']
-#     return workspace_id
