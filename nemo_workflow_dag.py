@@ -195,22 +195,21 @@ with DAG(
 #             dag=dag
 #     )
 
-
-# Put together the NeMo LLM workflow steps in order 
-create_gpt_workspace_task >> pretrain_decision_task
-create_tuning_workspace_task >> pretrain_decision_task
-
-pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
-download_the_pile_task >> train_gpt_task >> download_squad_task
-download_checkpoint_task >> download_squad_task
-
-download_squad_task >> choose_tuning_task >> lora_train_task
-download_squad_task >> choose_tuning_task>> p_tuning_train_task
-download_squad_task >> choose_tuning_task >> sft_train_task
-
-lora_train_task >> choose_inference_task >> inference_scripts()
-p_tuning_train_task >> choose_inference_task >> inference_scripts()
-sft_train_task >> choose_inference_task >> inference_scripts()
+    # Put together the NeMo LLM workflow steps in order 
+    create_gpt_workspace_task >> pretrain_decision_task
+    create_tuning_workspace_task >> pretrain_decision_task
+    
+    pretrain_decision_task >> [download_checkpoint_task, download_the_pile_task]
+    download_the_pile_task >> train_gpt_task >> download_squad_task
+    download_checkpoint_task >> download_squad_task
+    
+    download_squad_task >> choose_tuning_task >> lora_train_task
+    download_squad_task >> choose_tuning_task>> p_tuning_train_task
+    download_squad_task >> choose_tuning_task >> sft_train_task
+    
+    lora_train_task >> choose_inference_task >> inference_scripts()
+    p_tuning_train_task >> choose_inference_task >> inference_scripts()
+    sft_train_task >> choose_inference_task >> inference_scripts()
 
 # lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
 # lora_train_task >> choose_lora_inference_task >> lora_inference_task
