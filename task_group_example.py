@@ -15,8 +15,13 @@ with DAG(
     def group1():
         task1 = EmptyOperator(task_id="task1")
         task2 = EmptyOperator(task_id="task2")
+        task3 = EmptyOperator(task_id="task3")
+
+        task1 >> task3
+        task2 >> task3
 
 
-    task3 = EmptyOperator(task_id="task3")
+    task0 = EmptyOperator(task_id="task0")
+    task4 = EmptyOperator(task_id="task4")
 
-    group1() >> task3
+    task0 >> group1() >> task4
