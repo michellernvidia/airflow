@@ -78,6 +78,11 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
+      #avoid rerunning inference if we already have inference results for LoRA
+      lora_inference_txt_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_inference_5b.txt')
+      if lora_inference_txt_exists:
+            return
+
       pretrain_decision=ti.xcom_pull(task_ids='get_base_model')
       if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file

@@ -66,6 +66,11 @@ def p_tuning_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
       tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
+      #check if we already have p-tuning inference results in our workspace
+      ptuning_inference_results_exist=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'p_tuned_5b_inference_results.txt')
+      if ptuning_inference_results_exist:
+            return
+
       pretrain_decision=ti.xcom_pull(task_ids='get_base_model')
       if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file
