@@ -48,7 +48,6 @@ def name_tuning_workspace(method):
 tuning_workspace_name=name_tuning_workspace(tuning_method_)
 gpt_workspace_name = "airflow_gpt_workspace"
 
-    
 ## Define Airflow DAG and Tasks
 with DAG(
          "LLM_WORKFLOW_NEMO_BCP", 
@@ -180,27 +179,6 @@ with DAG(
         
         lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
         choose_inference_task >> create_triton_model_repo_task >> launch_triton_task
-    
-#     choose_lora_inference_task = BranchPythonOperator(
-#                 task_id = 'choose_lora_inference_task',
-#                 python_callable=choose_inference_lora,
-#                 op_kwargs={"interactive": interactive_},
-#                 dag=dag
-#         )
-
-#     choose_ptuning_inference_task = BranchPythonOperator(
-#             task_id = 'choose_ptuning_inference_task',
-#             python_callable=choose_inference_ptuning,
-#             op_kwargs={"interactive": interactive_},
-#             dag=dag
-#     )
-
-#     choose_sft_inference_task = BranchPythonOperator(
-#             task_id = 'choose_sft_inference_task',
-#             python_callable=choose_inference_sft,
-#             op_kwargs={"interactive": interactive_},
-#             dag=dag
-#     )
 
     # Put together the NeMo LLM workflow steps in order 
     create_gpt_workspace_task >> pretrain_decision_task
@@ -220,12 +198,3 @@ with DAG(
 
     choose_inference_task >> inference_scripts()
     choose_inference_task >> triton_inference()
-
-# lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
-# lora_train_task >> choose_lora_inference_task >> lora_inference_task
-
-# p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task >> launch_triton_task
-# p_tuning_train_task >> choose_ptuning_inference_task >> p_tuning_inference_task
-
-# sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task >> launch_triton_task
-# sft_train_task  >> choose_sft_inference_task >> sft_inference_task
