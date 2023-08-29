@@ -178,8 +178,8 @@ with DAG(
                 trigger_rule=TriggerRule.ONE_SUCCESS,
                 dag = dag)
         
-        lora_merge_weights_task >> create_triton_model_repo_task
-        create_triton_model_repo_task >> launch_triton_task
+        lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
+        choose_inference_task >> create_triton_model_repo_task >> launch_triton_task
     
 #     choose_lora_inference_task = BranchPythonOperator(
 #                 task_id = 'choose_lora_inference_task',
@@ -217,7 +217,7 @@ with DAG(
     lora_train_task >> choose_inference_task
     p_tuning_train_task >> choose_inference_task
     sft_train_task >> choose_inference_task 
-    
+
     choose_inference_task >> inference_scripts()
     choose_inference_task >> triton_inference()
 
