@@ -34,7 +34,6 @@ def choose_inference_sft(ti, interactive):
     
 
 def choose_inference(ti, interactive, method):
-    # interactive = interactive == True #convert string to bool
     if method == 'lora':
         if interactive:
             return 'merge_lora_adapter_weights'

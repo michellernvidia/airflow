@@ -33,7 +33,7 @@ ace_=str(ace_v)
 nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
-interactive_ = str(interactive_v) == True #convert to bool
+interactive_ = str(interactive_v) == True #convert deserialized str to bool
 
 # Set-up names for our tuning method's workspace in NGC
 def name_tuning_workspace(method):
@@ -154,26 +154,32 @@ with DAG(
                 python_callable= sft_inference_bcp,
                 op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
                 dag = dag)
-    
-    lora_merge_weights_task = PythonOperator(
-            task_id = 'merge_lora_adapter_weights',
-            python_callable= merge_lora_weights,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
+        
 
-    create_triton_model_repo_task = PythonOperator(
-            task_id = 'create_triton_model_repository',
-            python_callable= create_triton_model_repository,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
-            trigger_rule=TriggerRule.ONE_SUCCESS,
-            dag = dag)
+    @task_group(group_id='triton_inference')
+    def triton_inference():
+        lora_merge_weights_task = PythonOperator(
+                task_id = 'merge_lora_adapter_weights',
+                python_callable= merge_lora_weights,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+                dag = dag)
+
+        create_triton_model_repo_task = PythonOperator(
+                task_id = 'create_triton_model_repository',
+                python_callable= create_triton_model_repository,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+                trigger_rule=TriggerRule.ONE_SUCCESS,
+                dag = dag)
     
-#     launch_triton_task = PythonOperator(
-#             task_id = 'launch_triton_server',
-#             python_callable= launch_triton_server,
-#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
-#             trigger_rule=TriggerRule.ONE_SUCCESS,
-#             dag = dag)
+        launch_triton_task = PythonOperator(
+                task_id = 'launch_triton_server',
+                python_callable= launch_triton_server,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+                trigger_rule=TriggerRule.ONE_SUCCESS,
+                dag = dag)
+        
+        lora_merge_weights_task >> create_triton_model_repo_task
+        create_triton_model_repo_task >> launch_triton_task
     
 #     choose_lora_inference_task = BranchPythonOperator(
 #                 task_id = 'choose_lora_inference_task',
@@ -211,7 +217,9 @@ with DAG(
     lora_train_task >> choose_inference_task
     p_tuning_train_task >> choose_inference_task
     sft_train_task >> choose_inference_task 
+    
     choose_inference_task >> inference_scripts()
+    choose_inference_task >> triton_inference()
 
 # lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
 # lora_train_task >> choose_lora_inference_task >> lora_inference_task
