@@ -7,7 +7,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.python import BranchPythonOperator
 
 from task_workspace import create_task_workspace
-from branching import choose_tuning_method, get_base_model, choose_inference_lora, choose_inference_ptuning, choose_inference_sft
+from branching import choose_tuning_method, get_base_model, choose_inference_lora, choose_inference_ptuning, choose_inference_sft, choose_inference
 from nemo_checkpoint import download_nemo_checkpoint
 from pretrain_gpt import download_pile_dataset, train_gpt_model
 from download_squad import get_squad_dataset
@@ -115,22 +115,10 @@ with DAG(
             python_callable= p_tuning_training_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
-    
-    p_tuning_inference_task = PythonOperator(
-            task_id = 'p_tuning_inference_script',
-            python_callable= p_tuning_inference_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
 
     lora_train_task = PythonOperator(
             task_id = 'LoRA_train',
             python_callable= lora_training_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
-    
-    lora_inference_task = PythonOperator(
-            task_id = 'LoRA_inference_script',
-            python_callable= lora_inference_bcp,
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
     
@@ -140,52 +128,72 @@ with DAG(
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
             dag = dag)
     
-    sft_inference_task = PythonOperator(
-            task_id = 'SFT_inference_script',
-            python_callable= sft_inference_bcp,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
-    
-    lora_merge_weights_task = PythonOperator(
-            task_id = 'merge_lora_adapter_weights',
-            python_callable= merge_lora_weights,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
-            dag = dag)
-
-    create_triton_model_repo_task = PythonOperator(
-            task_id = 'create_triton_model_repository',
-            python_callable= create_triton_model_repository,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
-            trigger_rule=TriggerRule.ONE_SUCCESS,
-            dag = dag)
-    
-    launch_triton_task = PythonOperator(
-            task_id = 'launch_triton_server',
-            python_callable= launch_triton_server,
-            op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
-            trigger_rule=TriggerRule.ONE_SUCCESS,
-            dag = dag)
-    
-    choose_lora_inference_task = BranchPythonOperator(
-                task_id = 'choose_lora_inference_task',
+    choose_inference_task = BranchPythonOperator(
+                task_id = 'choose_inference_method',
                 python_callable=choose_inference_lora,
-                op_kwargs={"interactive": interactive_},
-                dag=dag
-        )
+                op_kwargs={"interactive": interactive_, "method": tuning_method_},
+                dag=dag)
+    
+    @task_group()
+    def inference_scripts():
+        p_tuning_inference_task = PythonOperator(
+                task_id = 'p_tuning_inference_script',
+                python_callable= p_tuning_inference_bcp,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+                dag = dag)
+        
+        lora_inference_task = PythonOperator(
+                task_id = 'LoRA_inference_script',
+                python_callable= lora_inference_bcp,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+                dag = dag)
+        
+        sft_inference_task = PythonOperator(
+                task_id = 'SFT_inference_script',
+                python_callable= sft_inference_bcp,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+                dag = dag)
+    
+#     lora_merge_weights_task = PythonOperator(
+#             task_id = 'merge_lora_adapter_weights',
+#             python_callable= merge_lora_weights,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_},
+#             dag = dag)
 
-    choose_ptuning_inference_task = BranchPythonOperator(
-            task_id = 'choose_ptuning_inference_task',
-            python_callable=choose_inference_ptuning,
-            op_kwargs={"interactive": interactive_},
-            dag=dag
-    )
+#     create_triton_model_repo_task = PythonOperator(
+#             task_id = 'create_triton_model_repository',
+#             python_callable= create_triton_model_repository,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+#             trigger_rule=TriggerRule.ONE_SUCCESS,
+#             dag = dag)
+    
+#     launch_triton_task = PythonOperator(
+#             task_id = 'launch_triton_server',
+#             python_callable= launch_triton_server,
+#             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "method": tuning_method_},
+#             trigger_rule=TriggerRule.ONE_SUCCESS,
+#             dag = dag)
+    
+#     choose_lora_inference_task = BranchPythonOperator(
+#                 task_id = 'choose_lora_inference_task',
+#                 python_callable=choose_inference_lora,
+#                 op_kwargs={"interactive": interactive_},
+#                 dag=dag
+#         )
 
-    choose_sft_inference_task = BranchPythonOperator(
-            task_id = 'choose_sft_inference_task',
-            python_callable=choose_inference_sft,
-            op_kwargs={"interactive": interactive_},
-            dag=dag
-    )
+#     choose_ptuning_inference_task = BranchPythonOperator(
+#             task_id = 'choose_ptuning_inference_task',
+#             python_callable=choose_inference_ptuning,
+#             op_kwargs={"interactive": interactive_},
+#             dag=dag
+#     )
+
+#     choose_sft_inference_task = BranchPythonOperator(
+#             task_id = 'choose_sft_inference_task',
+#             python_callable=choose_inference_sft,
+#             op_kwargs={"interactive": interactive_},
+#             dag=dag
+#     )
 
 
 # Put together the NeMo LLM workflow steps in order 
@@ -200,11 +208,15 @@ download_squad_task >> choose_tuning_task >> lora_train_task
 download_squad_task >> choose_tuning_task>> p_tuning_train_task
 download_squad_task >> choose_tuning_task >> sft_train_task
 
-lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
-lora_train_task >> choose_lora_inference_task >> lora_inference_task
+lora_train_task >> choose_inference_task >> inference_scripts()
+p_tuning_train_task >> choose_inference_task >> inference_scripts()
+sft_train_task >> choose_inference_task >> inference_scripts()
 
-p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task >> launch_triton_task
-p_tuning_train_task >> choose_ptuning_inference_task >> p_tuning_inference_task
+# lora_train_task >> choose_lora_inference_task >> lora_merge_weights_task >> create_triton_model_repo_task >> launch_triton_task
+# lora_train_task >> choose_lora_inference_task >> lora_inference_task
 
-sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task >> launch_triton_task
-sft_train_task  >> choose_sft_inference_task >> sft_inference_task
+# p_tuning_train_task >> choose_ptuning_inference_task >> create_triton_model_repo_task >> launch_triton_task
+# p_tuning_train_task >> choose_ptuning_inference_task >> p_tuning_inference_task
+
+# sft_train_task  >> choose_sft_inference_task >> create_triton_model_repo_task >> launch_triton_task
+# sft_train_task  >> choose_sft_inference_task >> sft_inference_task
