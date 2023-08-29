@@ -132,6 +132,7 @@ with DAG(
                 task_id = 'choose_inference_method',
                 python_callable=choose_inference_lora,
                 op_kwargs={"interactive": interactive_, "method": tuning_method_},
+                trigger_rule=TriggerRule.ONE_SUCCESS,
                 dag=dag)
     
     @task_group()
