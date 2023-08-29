@@ -50,7 +50,7 @@ gpt_workspace_name = "airflow_gpt_workspace"
 
 ## Define Airflow DAG and Tasks
 with DAG(
-         "LLM_WORKFLOW_NEMO_BCP", 
+         "NeMo_LLM_Workflow_DGX_Cloud", 
          schedule_interval='@once',
          start_date=datetime(2022, 1, 1),
          catchup=False
