@@ -20,7 +20,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
 
       #ngc job parameters
       job_name = "airflow_sft_gpt3_5b_train"
-      ace_instance = "dgxa100.80g.8.norm"
+      ace_instance = "dgxa100.80g.2.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.07-py3"
       replica_count = 1
@@ -38,6 +38,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
                         launcher_scripts_path=/opt/NeMo-Megatron-Launcher/launcher_scripts \
                         data_dir=/mount/tuning_workspace/SQuAD/v1.1 \
                         base_results_dir=/mount/tuning_workspace/sft_launcher_results \
+                        fine_tuning.trainer.devices=2 \
                         fine_tuning.run.model_train_name=gpt3_5b_sft \
                         fine_tuning.model.restore_from_path=/mount/gpt_workspace/gpt_models/{gpt_base_model_name} \
                         fine_tuning.model.tensor_model_parallel_size=2 \
@@ -80,7 +81,7 @@ def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
 
       #ngc job parameters
       job_name = "airflow_sft_gpt3_5b_inference"
-      ace_instance = "dgxa100.80g.8.norm"
+      ace_instance = "dgxa100.80g.2.norm"
       ace_name = ace
       docker_image = f"{org}/nemofw-training:23.07-py3"
       replica_count = 1
