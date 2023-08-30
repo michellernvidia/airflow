@@ -27,7 +27,7 @@ def squad_metric_eval(ti, ngc_api_key, org, ace,tuning_method, team=None):
     elif tuning_method=='p_tuning':
         inference_preds = '/mount/tuning_workspace/p_tuning_results/gpt3_5b/prompt_learning_squad/results/p_tuned_gpt3_5b_inference.txt'
         split_string= 'Answer:'
-        answer_field= 'Answer'
+        answer_field= 'answer'
 
     #command to merge LoRA adapter weights with base LLM on BCP (DGX Cloud)
     job_command=f"python3 /opt/NeMo/scripts/metric_calculation/squad_metric_calc.py \
