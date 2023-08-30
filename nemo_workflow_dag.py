@@ -15,6 +15,7 @@ from p_tuning import p_tuning_training_bcp, p_tuning_inference_bcp
 from lora import lora_training_bcp, lora_inference_bcp
 from sft import sft_training_bcp, sft_inference_bcp
 from triton import merge_lora_weights, create_triton_model_repository, launch_triton_server
+from squad_eval import squad_metric_eval
 
 # Get variables from Airflow UI
 key_v = Variable.get("key_v", deserialize_json=True)
@@ -131,6 +132,13 @@ with DAG(
                 trigger_rule=TriggerRule.ONE_SUCCESS,
                 dag=dag)
     
+    squad_eval_task = PythonOperator(
+                task_id = 'squad_metric_eval',
+                python_callable= squad_metric_eval,
+                op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "team": team_, "tuning_method": tuning_method_},
+                trigger_rule=TriggerRule.ONE_SUCCESS,
+                dag = dag)
+    
     @task_group(group_id='nemo_script_inference')
     def inference_scripts():
         p_tuning_inference_task = PythonOperator(
@@ -192,5 +200,5 @@ with DAG(
     p_tuning_train_task >> choose_inference_task
     sft_train_task >> choose_inference_task 
 
-    choose_inference_task >> inference_scripts()
+    choose_inference_task >> inference_scripts() >> squad_eval_task
     choose_inference_task >> triton_inference()
