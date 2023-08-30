@@ -3,20 +3,12 @@ performing p-tuning on it'''
 
 import os, json, base64, requests, time
 from datetime import datetime
-from airflow import DAG
-from airflow.decorators import task
-from airflow.operators.python import PythonOperator
-from airflow.operators.python import BranchPythonOperator
-from airflow.models import Variable
-
 from ngc_requests import create_workspace, ngc_job_request, wait_for_job_completion
     
 
-def download_missing_files():
-    return
-
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
 def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
+     raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.')
      
      #create workspace to download the pile dataset into
     #  workspace_name = 'the_pile_dataset_airflow'
@@ -63,6 +55,7 @@ def download_pile_dataset(ti, ngc_api_key, org, ace, team=None):
 
 # NEEDS TO BE RUN + TESTED ON AIRFLOW
 def train_gpt_model(ti, ngc_api_key, org, ace, team=None):
+     raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.')
      
      #get the pile dataset workspace info
     #  _, workspace_id = ti.xcom_pull(task_ids='download_pile_dataset')
