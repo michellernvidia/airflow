@@ -65,7 +65,9 @@ def get_existing_workspace(ti, ngc_api_key, org, workspace_name):
     }
 
     response = requests.request("GET", url, headers=headers)
-    if response.status_code != 200:
+
+    #ok if status code is 404. We use this later on to decide if we should create a new wksp
+    if response.status_code != 200 and response.status_code != 404:
         raise Exception("HTTP Error %d: from '%s'" % (response.status_code, url))
     return response.json()
 
