@@ -1,10 +1,8 @@
-import time
-from ngc_requests import *
-
-'''Python file containing functions relevant to the path where we 
-load in a nemo checkpoint and validate its successful download'''
+from ngc_requests import find_file_in_workspace, ngc_job_request, wait_for_job_completion
 
 def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=None):
+      '''Download a pretrained .nemo checkpoint into an NGC workspace. Currently configured to download the 
+      nemo_gpt_5B_bf16_tp2.nemo checkpoint'''
 
       #get workspace id
       workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
@@ -30,12 +28,7 @@ def download_nemo_checkpoint(ti, ngc_api_key, org, ace, nemo_ckpt_file, team=Non
                                      replica_count, workspaces, job_command, team=team)
       
       #wait for job to complete on BCP before allowing airflow to "finish" task
-      final_job_status = wait_for_job_completion(ti,
-                                                 ngc_api_key, 
-                                                 org, 
-                                                 job_response, 
-                                                 wait_time=15, 
-                                                 team=team)
+      final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=15, team=team)
 
       return job_response, workspace_id, nemo_ckpt_file
  
