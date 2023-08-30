@@ -1,6 +1,5 @@
 from ngc_requests import get_existing_workspace, create_workspace
 
-
 def create_task_workspace(ti, ngc_api_key, org, ace, workspace_name):
     '''Creates a NGC workspace in the specied NGC org and ace under the name *workspace_name*.
     Returns workspace ID for created workspace to be used in downstream tasks.'''
