@@ -17,7 +17,7 @@ def lora_training_bcp(ti, ngc_api_key, org, ace, team=None):
       if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file
       else:
-            raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.') #TO DO
+            raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.')
 
       #ngc job parameters
       job_name = "airflow_lora_gpt3_5b_train"
@@ -87,7 +87,7 @@ def lora_inference_bcp(ti, ngc_api_key, org, ace, team=None):
       if pretrain_decision=='download_nemo_checkpoint':
             _,_, gpt_base_model_name=ti.xcom_pull(task_ids='download_nemo_checkpoint') #.nemo file
       else:
-            raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.') #TO DO
+            raise NotImplementedError('GPT pretraining not implemented. Consider rerunning with a pretrained .nemo checkpoint.')
 
       #ngc job parameters
       job_name = "airflow_lora_gpt3_5b_inference"
