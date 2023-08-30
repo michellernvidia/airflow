@@ -81,7 +81,6 @@ with DAG(
             op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "nemo_ckpt_file": nemo_ckpt_, "team": team_},
             dag = dag)
 
-    # op_kwargs= {"ngc_api_key": key_, "org":org_, "ace": ace_, "workspace_name": workspace_name_, "team": team_},
     download_the_pile_task = PythonOperator(
             task_id = 'download_pile_dataset',
             python_callable= download_pile_dataset,
