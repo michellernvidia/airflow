@@ -1,6 +1,7 @@
 from ngc_requests import find_file_in_workspace, ngc_job_request, wait_for_job_completion
 
 def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
+      '''Launches an SFT training job on BCP via NeMo Framework Training container'''
 
       #get workspace id
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
@@ -61,6 +62,7 @@ def sft_training_bcp(ti, ngc_api_key, org, ace, team=None):
 
 
 def sft_inference_bcp(ti, ngc_api_key, org, ace, team=None):
+      '''Launches an SFT inference job on BCP via NeMo Framework Training container'''
 
       #get workspace id
       gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')

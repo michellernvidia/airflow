@@ -1,5 +1,4 @@
-import time
-from ngc_requests import *
+from ngc_requests import find_file_in_workspace, ngc_job_request, wait_for_job_completion
 
 
 def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
