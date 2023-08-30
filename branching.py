@@ -1,6 +1,8 @@
-'''File with branching functions for NeMo Airflow DAG'''
+# File with branching functions for NeMo Airflow DAG
 
 def get_base_model(ti, pretrain_decision):
+    '''Branching decision for base LLM pretraining task in Airflow'''
+
     if pretrain_decision == "False":
         return 'download_nemo_checkpoint'
     else:
@@ -8,6 +10,8 @@ def get_base_model(ti, pretrain_decision):
 
 
 def choose_tuning_method(ti, method):
+    '''Branching decision for selecting tuning method in Airflow'''
+
     if method == 'p_tuning':
         return 'p_tuning_train'
     elif method == 'lora':
@@ -17,6 +21,8 @@ def choose_tuning_method(ti, method):
 
 
 def choose_inference(ti, interactive, method):
+    '''Branching decision for selecting inference strategy to run on tuned model in Airflow'''
+    
     if method == 'lora':
         if interactive:
             return 'triton_inference.merge_lora_adapter_weights'
