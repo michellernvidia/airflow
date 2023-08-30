@@ -2,11 +2,17 @@ from ngc_requests import find_file_in_workspace, ngc_job_request, wait_for_job_c
 
 
 def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
+    '''Launches a job on BCP using NeMo Framework Training container
+    to merge the adapter layer weights from our trained LoRA model with the 
+    weights from the GPT model acting as our base LLM. The final merged model gets
+    saved in the NGC workspace for LoRA Airflow tasks. This will be the model that gets 
+    served to Triton for inference.'''
+
     #get workspace id
     gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
     tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
 
-    #avoid merging if file already exists
+    #avoid merging if file already exists in our workspace
     merged_model_exists=find_file_in_workspace(ngc_api_key, org, tuning_workspace_id, 'lora_gpt_5B_merged.nemo')
     if merged_model_exists:
         return
@@ -20,7 +26,7 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
     workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                 {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
 
-    #currently set up to use GPT 5B - will need to generalize
+    #command to merge LoRA adapter weights with base LLM on BCP (DGX Cloud)
     job_command="python3 /opt/NeMo/scripts/nlp_language_modeling/merge_lora_weights/merge.py \
                 trainer.devices=2 \
                 trainer.precision=bf16 \
@@ -40,8 +46,8 @@ def merge_lora_weights(ti, ngc_api_key, org, ace, team=None):
 
 
 def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=None):
-    '''Converts .nemo file into faster transformer + creates the model repository necessary to 
-    serve the model through Triton inference server'''
+    '''Converts .nemo file into Faster Transformer format + creates the model 
+    repository necessary to serve the model through Triton inference server'''
     
     #get workspace id
     gpt_workspace_id = ti.xcom_pull(task_ids='create_gpt_workspace')
@@ -56,7 +62,7 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
     workspaces=[{"id":gpt_workspace_id, "mount": "/mount/gpt_workspace"}, 
                 {"id":tuning_workspace_id, "mount": "/mount/tuning_workspace"}]
     
-
+    #declare paths to our tuned models that will need to be converted + run on Triton
     if method=="p_tuning":
         nemo_file_path="/mount/gpt_workspace/gpt_models/nemo_gpt5B_bf16_tp2.nemo"
         model_train_name="gpt3_5B"
@@ -93,11 +99,10 @@ def create_triton_model_repository(ti, ngc_api_key, org, ace, team=None, method=
     #wait for job to complete on BCP before allowing airflow to "finish" task
     final_job_status = wait_for_job_completion(ti, ngc_api_key, org, job_response, wait_time=30, team=team)
 
-
     return job_response
 
 def launch_triton_server(ti, ngc_api_key, org, ace, team=None, method=None):
-    '''Launches an interactive Triton server on BCP using ports 8000, 8001, 8002'''
+    '''Launches an interactive Triton Inference server on BCP using ports 8000, 8001, 8002'''
 
     #get workspace id
     tuning_workspace_id = ti.xcom_pull(task_ids='create_tuning_workspace')
