@@ -38,14 +38,23 @@ tuning_method_ = str(tuning_method_v)
 interactive_ = str(interactive_v) == 'True' #convert deserialized str to bool
 unique_name_ = str(unique_name_v)
 
-# Set-up names for our tuning method's workspace in NGC
+# # Set-up names for our tuning method's workspace in NGC
+# def name_tuning_workspace(method, unique_name):
+#     if method =='lora':
+#         tuning_workspace_name = f'airflow_lora_nemo_workspace_{unique_name_}' 
+#     elif method == 'p_tuning':
+#         tuning_workspace_name = f'airflow_ptuning_nemo_workspace_{unique_name_}'
+#     elif method == 'sft':
+#         tuning_workspace_name = f'airflow_sft_nemo_workspace_{unique_name_}'
+#     return tuning_workspace_name
+
 def name_tuning_workspace(method, unique_name):
     if method =='lora':
-        tuning_workspace_name = f'airflow_lora_nemo_workspace_{unique_name_}' 
+        tuning_workspace_name = f'airflow_lora_nemo_workspace' 
     elif method == 'p_tuning':
-        tuning_workspace_name = f'airflow_ptuning_nemo_workspace_{unique_name_}'
+        tuning_workspace_name = f'airflow_ptuning_nemo_workspace'
     elif method == 'sft':
-        tuning_workspace_name = f'airflow_sft_nemo_workspace_{unique_name_}'
+        tuning_workspace_name = f'airflow_sft_nemo_workspace'
     return tuning_workspace_name
 
 tuning_workspace_name=name_tuning_workspace(tuning_method_, unique_name_)
