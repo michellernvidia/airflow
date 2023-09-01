@@ -26,6 +26,7 @@ nemo_ckpt_v = Variable.get("nemo_ckpt_v", deserialize_json=True)
 pretrain_decision_v = Variable.get("pretrain_decision_v", deserialize_json=True)
 tuning_method_v = Variable.get("tuning_method_v", deserialize_json=True)
 interactive_v = Variable.get("interactive_inference_v", deserialize_json=True)
+unique_name_v = Variable.get("unique_name_v", deserialize_json=True)
 
 key_= str(key_v)
 org_=str(org_v)
@@ -35,19 +36,20 @@ nemo_ckpt_=str(nemo_ckpt_v)
 pretrain_decision_ = str(pretrain_decision_v)
 tuning_method_ = str(tuning_method_v)
 interactive_ = str(interactive_v) == 'True' #convert deserialized str to bool
+unique_name_ = str(unique_name_v)
 
 # Set-up names for our tuning method's workspace in NGC
-def name_tuning_workspace(method):
+def name_tuning_workspace(method, unique_name):
     if method =='lora':
-        tuning_workspace_name = 'airflow_lora_nemo_workspace' 
+        tuning_workspace_name = f'airflow_lora_nemo_workspace_{unique_name_}' 
     elif method == 'p_tuning':
-        tuning_workspace_name = 'airflow_ptuning_nemo_workspace'
+        tuning_workspace_name = f'airflow_ptuning_nemo_workspace_{unique_name_}'
     elif method == 'sft':
-        tuning_workspace_name = 'airflow_sft_nemo_workspace'
+        tuning_workspace_name = f'airflow_sft_nemo_workspace_{unique_name_}'
     return tuning_workspace_name
 
-tuning_workspace_name=name_tuning_workspace(tuning_method_)
-gpt_workspace_name = "airflow_gpt_nemo_workspace"
+tuning_workspace_name=name_tuning_workspace(tuning_method_, unique_name_)
+gpt_workspace_name = f"airflow_gpt_nemo_workspace_{unique_name_}"
 
 ## Define Airflow DAG and Tasks
 with DAG(
